@@ -3,7 +3,7 @@
 
 import bpy
 import bpy.types
-import re
+import re, os
 from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage
 from .utils import createEmptyMaterial
 from datetime import datetime
@@ -145,6 +145,8 @@ class MHMat:
         self.settings["depthless"] = False
 
     def _parseFile(self, fileName):
+        full = os.path.abspath(fileName)
+        location = os.path.dirname(full)
         with open(fileName, 'r') as f:
             line = f.readline()
             while line:
@@ -162,7 +164,7 @@ class MHMat:
                             if key in self._metadataKeys:
                                 self.settings[key] = value
                             if key in self._textureKeys:
-                                self.settings[key] = value
+                                self.settings[key] = os.path.join(location, value)
                             if key in self._boolKeys:
                                 self.settings[key] = (value.lower() == "true")
                             if key in self._floatKeys:
