@@ -105,6 +105,28 @@ class MHMat:
             "castShadows",
             "receiveShadows"]
 
+        self._boolKeys = [
+            "shadeless",
+            "wireframe",
+            "transparent",
+            "backfaceCull",
+            "depthless",
+            "castShadows",
+            "receiveShadows",
+            "sssEnable"
+        ]
+
+        self._floatKeys = [
+            "shininess",
+            "opacity",
+            "translucency",
+            "sssRScale",
+            "sssGScale",
+            "sssBScale"
+        ]
+
+        self._floatKeys.extend(self._intensityKeys)
+
         # TODO: Consider shaderConfig and shaderParam
 
         self._keyList = self._metadataKeys + self._colorKeys + self._textureKeys + self._intensityKeys + self._sssKeys + self._variousKeys
@@ -141,6 +163,10 @@ class MHMat:
                                 self.settings[key] = value
                             if key in self._textureKeys:
                                 self.settings[key] = value
+                            if key in self._boolKeys:
+                                self.settings[key] = (value.lower() == "true")
+                            if key in self._floatKeys:
+                                self.settings[key] = float(value)
                     else:
                         print("no match")
                         print(parsedLine)
@@ -196,13 +222,13 @@ class MHMat:
     def __str__(self):
         mat = "# This is a material file for MakeHuman, produced by MakeSkin\n\n"
 
-        mat = mat + "// Metadata\n"
+        mat = mat + "// Metadata\n\n"
         for key in self._metadataKeys:
             if key in self.settings and not self.settings[key] is None:
                 mat = mat + key + " = " + str(self.settings[key]) + "\n"
 
         mat = mat + "\n"
-        mat = mat + "// Color shading attributes\n"
+        mat = mat + "// Color shading attributes\n\n"
 
         for key in self._colorKeys:
             if key in self.settings and not self.settings[key] is None:
