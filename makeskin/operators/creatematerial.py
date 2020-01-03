@@ -25,10 +25,13 @@ class MHS_OT_CreateMaterialOperator(bpy.types.Operator):
         scn = context.scene
 
         if hasMaterial(obj):
-            print(scn.MhMsOverwrite2)
-            if not scn.MhMsOverwrite2:
+            print(scn.MhMsOverwrite1)
+            if not scn.MhMsOverwrite1:
                 self.report({'ERROR'}, "Object already has a material, and only one material at a time is supported")
                 return {'FINISHED'}
+            else:
+                while len(obj.data.materials) > 0:
+                    obj.data.materials.pop(index=0)
 
         dPH = scn.MhMsCreateDiffuse
         nPH = scn.MhMsCreateNormal

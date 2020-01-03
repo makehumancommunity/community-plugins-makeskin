@@ -3,11 +3,13 @@
 
 import bpy
 import bpy.types
-from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage
+from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap
 import pprint, os
 
 _coords = dict()
 _coords["diffuseTexture"] = [-400.0, 300.0]
+_coords["normalMapTextureSolo"] = [-600.0, -300.0]
+_coords["normalMapSolo"] = [-250.0, -200.0]
 
 class NodeHelper:
 
@@ -63,6 +65,36 @@ class NodeHelper:
             self._nodetree.links.new(dt.outputs["Color"], self._principledNode.inputs["Base Color"])
             self._nodetree.links.new(dt.outputs["Alpha"], self._principledNode.inputs["Transmission"])
         return dt
+
+    def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
+        # TODO: support bump maps
+        self.createOnlyNormal(normalImagePathAbsolute=normalImagePathAbsolute, linkToPrincipled=linkToPrincipled)
+
+    def createOnlyBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
+        pass
+
+    def createOnlyNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
+        global _coords
+        nmt = self._nodetree.nodes.new("ShaderNodeTexImage")
+        nmt.location = _coords["normalMapTextureSolo"]
+
+        if normalImagePathAbsolute:
+            fn = os.path.basename(normalImagePathAbsolute)
+            if fn in bpy.data.images:
+                print("image existed: " + normalImagePathAbsolute)
+                image = bpy.data.images[fn]
+            else:
+                image = bpy.data.images.load(normalImagePathAbsolute)
+            image.colorspace_settings.name = "Non-Color"
+            nmt.image = image
+
+        nm = self._nodetree.nodes.new("ShaderNodeNormalMap")
+        nm.location = _coords["normalMapSolo"]
+
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(nm.outputs["Normal"], self._principledNode.inputs["Normal"])
+            self._nodetree.links.new(nmt.outputs["Color"], nm.inputs["Color"])
+        return nmt
 
     def findDiffuseTextureNode(self):
         if not self._principledNode:

@@ -51,6 +51,32 @@ class MHMat:
         self.nodehelper = NodeHelper(obj)
         if self.settings["diffuseTexture"] or diffusePH:
             self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
+
+        if self.settings["diffuseColor"] is not None:
+            col = self.settings["diffuseColor"]
+            col.append(1.0)
+            self.nodehelper.setPrincipledSocketDefaultValue("Base Color", self.settings["diffuseColor"])
+            mat.diffuse_color = col
+
+        if self.settings["shininess"] is not None:
+            self.nodehelper.setPrincipledSocketDefaultValue("Roughness", 1.0 - self.settings["shininess"])
+
+        bump = bumpPH
+        if self.settings["bumpmapTexture"]:
+            bump = True
+
+        normal = normalPH
+        if self.settings["normalmapTexture"]:
+            normal = True
+
+        if bump and normal:
+            self.nodehelper.createBumpAndNormal(bumpImagePathAbsolute=self.settings["bumpmapTexture"], normalImagePathAbsolute=self.settings["normalmapTexture"])
+        else:
+            if bump:
+                # TODO: Support bump maps
+                pass
+            if normal:
+                self.nodehelper.createOnlyNormal(normalImagePathAbsolute=self.settings["normalmapTexture"])
         return mat
 
     def _setupDefaultAndPlaceholders(self):
