@@ -4,8 +4,8 @@
 import bpy
 import bpy.types
 import re, os
-from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage
 from .utils import createEmptyMaterial
+from .nodehelper import NodeHelper
 from datetime import datetime
 import pprint
 
@@ -25,6 +25,7 @@ class MHMat:
         self._principledNode = None
 
         self.diffuseTexture = None
+        self.nodehelper = None
 
         if not obj is None:
             if len(obj.data.materials) > 0:
@@ -34,8 +35,7 @@ class MHMat:
                 if not hasattr(self._blenderMaterial, "node_tree") or not hasattr(self._blenderMaterial.node_tree, "nodes"):
                     raise ValueError("Only cycles/eevee materials are supported")
                 else:
-                    # We have a cycles/eevee material, or a blender-internal material with nodes
-                    self._parseNodeTree(self._blenderMaterial.node_tree)
+                    self.nodehelper = NodeHelper(obj)
             else:
                 raise ValueError("Object does not have any material")
 
@@ -48,6 +48,10 @@ class MHMat:
         now = datetime.now()
         name = "makeskin." + now.strftime("%Y%m%d%H:%M:%S")
         mat = createEmptyMaterial(obj,name)
+        self.nodehelper = NodeHelper(obj)
+        if self.settings["diffuseTexture"] or diffusePH:
+            self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
+        return mat
 
     def _setupDefaultAndPlaceholders(self):
 
@@ -174,52 +178,6 @@ class MHMat:
                         print(parsedLine)
                 line = f.readline()
         print(self)
-
-    def _parseNodeTree(self, nodes):
-        self._nodes = nodes
-
-        # Assume there is a principled node to which everything else
-        # is connected. So find that first
-        for node in nodes.nodes:
-            if isinstance(node,ShaderNodeBsdfPrincipled):
-                self._parsePrincipled(node)
-
-        self._findDiffuseTexture()
-
-    def _parsePrincipled(self, principled):
-        self._principledNode = principled
-        self.diffuseColor = principled.inputs["Base Color"].default_value
-        self.shininess = 1.0 - principled.inputs["Roughness"].default_value
-
-    def _findDiffuseTexture(self):
-        if not self._principledNode:
-            return
-        for link in self._nodes.links:
-            if link.to_node == self._principledNode:
-                tsock = link.to_socket
-                if tsock.name == "Base Color":
-                    fnode = link.from_node
-                    if isinstance(fnode, ShaderNodeTexImage):
-                        if fnode.image:
-                            if fnode.image.filepath or fnode.image.filepath_raw:
-                                if fnode.image.filepath:
-                                    self.diffuseTexture = fnode.image.filepath
-                                else:
-                                    self.diffuseTexture = fnode.image.filepath_raw
-                            else:
-                                print("Found image texture with an image property, but the image had an empty file path. Giving up on finding a diffuse texture.")
-                                return
-                        else:
-                            print("Found an image texture, but its image property was empty. Giving up on finding a diffuse texture.")
-                            return
-                    else:
-                        print("The principled node had a link to its Base Color input, but the source was not an image texture. Giving up on finding a diffuse texture.")
-                        return
-        if self.diffuseTexture:
-            self.diffuseTexture = bpy.path.abspath(self.diffuseTexture)
-            print("Found a diffuse texture: " + self.diffuseTexture)
-        else:
-            print("There was no diffuse texture to be found")
             
     def __str__(self):
         mat = "# This is a material file for MakeHuman, produced by MakeSkin\n\n"

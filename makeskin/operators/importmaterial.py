@@ -33,6 +33,9 @@ class MHS_OT_ImportMaterialOperator(bpy.types.Operator, ImportHelper):
             if not scn.MhMsOverwrite2:
                 self.report({'ERROR'}, "Object already has a material, and only one material at a time is supported")
                 return {'FINISHED'}
+            else:
+                while len(obj.data.materials) > 0:
+                    obj.data.materials.pop(index=0)
 
         mhmat = MHMat(fileName=self.filepath)
         mhmat.assignAsNodesMaterialForObj(obj)
