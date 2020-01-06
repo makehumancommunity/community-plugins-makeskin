@@ -15,11 +15,6 @@ _licenses.append(("AGPL",  "AGPL", "Affero Gnu Public License (don't use unless 
 _licenseDescription = "Set an output license for the material. This will have no practical effect apart from being included in the written MHMAT file."
 
 def extraProperties():
-    #
-    # properties used by materials are added to the scene
-    #
-    bpy.types.Scene.MhMsMatLicense = bpy.props.EnumProperty(items=_licenses, name="material_license", description=_licenseDescription, default="CC0")
-    bpy.types.Scene.MhMsMatAuthor  = StringProperty(name="Author name", description="", default="unknown")
 
     # Object properties, normally set by MPFB
     if not hasattr(bpy.types.Object, "MhObjectType"):
@@ -34,4 +29,21 @@ def extraProperties():
     bpy.types.Scene.MhMsOverwrite1 = BoolProperty(name="Overwrite existing (create)", description="Overwrite existing material(s) on object", default=False)
     bpy.types.Scene.MhMsOverwrite2 = BoolProperty(name="Overwrite existing (import)", description="Overwrite existing material(s) on object", default=False)
 
+    # Metadata keys
+    bpy.types.Object.MhMsName = StringProperty(name="Name", description="The name of this material. This will have little practical effect apart from being written to the mhmat file.", default="material")
+    bpy.types.Object.MhMsTag = StringProperty(name="Tag", description="A category the material fits into, for example \"blond\" or \"female\". This will influence sorting and filtering in MH.", default="")
+    bpy.types.Object.MhMsDescription = StringProperty(name="Description", description="A description of the material. It will have little practical effect apart from being written to the mhmat file.", default="")
+    bpy.types.Object.MhMsMatLicense = bpy.props.EnumProperty(items=_licenses, name="License", description=_licenseDescription, default="CC0")
+    bpy.types.Object.MhMsAuthor = StringProperty(name="Author", description="The author of this material. This will have little practical effect apart from being written to the mhmat file.", default="")
+    bpy.types.Object.MhMsHomepage = StringProperty(name="Home page", description="The home page of the material, if any. This will have little practical effect apart from being written to the mhmat file.", default="")
 
+    # Boolean keys
+    bpy.types.Object.MhMsBackfaceCull = BoolProperty(name="Backface culling", description="If the back side of faces with the material should be invisible. This has no effect in exports, but may be important in MH", default=True)
+    bpy.types.Object.MhMsCastShadows = BoolProperty(name="Cast shadows", description="If the material casts shadows. This has no effect in exports.", default=True)
+    bpy.types.Object.MhMsReceiveShadows = BoolProperty(name="Receive shadows", description="If the material receives shadows. This has no effect in exports.", default=True)
+    bpy.types.Object.MhMsAlphaToCoverage = BoolProperty(name="AlphaToCoverage", description="I have no idea what this does, but it might be important", default=True)
+    bpy.types.Object.MhMsShadeless = BoolProperty(name="Shadeless", description="If the material is shadeless. It is unlikely you want this.", default=False)
+    bpy.types.Object.MhMsWireframe = BoolProperty(name="Wireframe", description="If the material is to be rendered as a wireframe. It is unlikely you want this.", default=False)
+    bpy.types.Object.MhMsTransparent = BoolProperty(name="Transparent", description="If the material is to be rendered as a transparent. It is unlikely you want this, as the normal approach is using the alpha channel in the diffuse texture.", default=False)
+    bpy.types.Object.MhMsDepthless = BoolProperty(name="Depthless", description="If the material is to be rendered as having no depth. It is unlikely you want this.", default=False)
+    bpy.types.Object.MhMsSSSEnable = BoolProperty(name="SSS Enable", description="If the material is to be rendered with sub surface scattering.", default=False)
