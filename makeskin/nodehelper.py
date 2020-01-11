@@ -3,13 +3,15 @@
 
 import bpy
 import bpy.types
-from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap
+from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump
 import pprint, os
 
 _coords = dict()
 _coords["diffuseTexture"] = [-400.0, 300.0]
 _coords["normalMapTextureSolo"] = [-600.0, -300.0]
 _coords["normalMapSolo"] = [-250.0, -200.0]
+_coords["bumpMapTextureSolo"] = [-600.0, -300.0]
+_coords["bumpMapSolo"] = [-250.0, -200.0]
 
 class NodeHelper:
 
@@ -63,7 +65,7 @@ class NodeHelper:
 
         if linkToPrincipled and self._principledNode:
             self._nodetree.links.new(dt.outputs["Color"], self._principledNode.inputs["Base Color"])
-            self._nodetree.links.new(dt.outputs["Alpha"], self._principledNode.inputs["Transmission"])
+            self._nodetree.links.new(dt.outputs["Alpha"], self._principledNode.inputs["Alpha"])
         return dt
 
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
@@ -71,7 +73,27 @@ class NodeHelper:
         self.createOnlyNormal(normalImagePathAbsolute=normalImagePathAbsolute, linkToPrincipled=linkToPrincipled)
 
     def createOnlyBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
-        pass
+        global _coords
+        bmt = self._nodetree.nodes.new("ShaderNodeTexImage")
+        bmt.location = _coords["bumpMapTextureSolo"]
+
+        if bumpImagePathAbsolute:
+            fn = os.path.basename(bumpImagePathAbsolute)
+            if fn in bpy.data.images:
+                print("image existed: " + bumpImagePathAbsolute)
+                image = bpy.data.images[fn]
+            else:
+                image = bpy.data.images.load(bumpImagePathAbsolute)
+            image.colorspace_settings.name = "Non-Color"
+            bmt.image = image
+
+        bm = self._nodetree.nodes.new("ShaderNodeBump")
+        bm.location = _coords["bumpMapSolo"]
+
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(bm.outputs["Normal"], self._principledNode.inputs["Normal"])
+            self._nodetree.links.new(bmt.outputs["Color"], bm.inputs["Height"])
+        return bmt
 
     def createOnlyNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
         global _coords

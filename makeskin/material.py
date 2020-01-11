@@ -73,8 +73,7 @@ class MHMat:
             self.nodehelper.createBumpAndNormal(bumpImagePathAbsolute=self.settings["bumpmapTexture"], normalImagePathAbsolute=self.settings["normalmapTexture"])
         else:
             if bump:
-                # TODO: Support bump maps
-                pass
+                self.nodehelper.createOnlyBump(bumpImagePathAbsolute=self.settings["bumpmapTexture"])
             if normal:
                 self.nodehelper.createOnlyNormal(normalImagePathAbsolute=self.settings["normalmapTexture"])
         return mat
