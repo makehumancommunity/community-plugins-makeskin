@@ -24,6 +24,8 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator):
         obj = context.active_object
         scn = context.scene
 
+        fnAbsolute = "/tmp/hej.mhmat"
+
         if not hasMaterial(obj):
             self.report({'ERROR'}, "Object does not have a material")
             return {'FINISHED'}
@@ -55,6 +57,15 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator):
         mhmat.settings['transparent'] = obj.MhMsTransparent
         mhmat.settings['depthless'] = obj.MhMsDepthless
         mhmat.settings['sssEnable'] = obj.MhMsSSSEnable
+
+        handling = "NORMALIZE"
+        if obj.MhMsTextures:
+            handling = obj.MhMsTextures
+        if handling == "NORMALIZE":
+            mhmat.copyTextures(fnAbsolute)
+        if handling == "COPY":
+            mhmat.copyTextures(fnAbsolute,normalize=False)
+        # If handling is LINK, then paths are already correct
 
         print(mhmat)
         self.report({'INFO'}, "A material file was written")

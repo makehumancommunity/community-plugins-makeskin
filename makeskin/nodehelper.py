@@ -3,7 +3,7 @@
 
 import bpy
 import bpy.types
-from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump, ShaderNodeNormal
+from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump, ShaderNodeNormalMap
 import pprint, os
 
 _coords = dict()
@@ -209,11 +209,16 @@ class NodeHelper:
             print("The principled node did not have anything linked to its Normal input, so there is no normalmap texture node")
             return None
         if isinstance(nn, ShaderNodeBump):
+            print("has bump")
             nn = self._findNodeLinkedTo(nn, "Normal")
             if not nn:
+                print("no bump link")
                 return None
-        if isinstance(nn, ShaderNodeNormal):
+        if isinstance(nn, ShaderNodeNormalMap):
             ntn = self._findNodeLinkedTo(nn, "Color")
+        else:
+            print("not normal")
+            print(nn)
         return ntn
 
     def findNormalMapTextureFilePath(self):

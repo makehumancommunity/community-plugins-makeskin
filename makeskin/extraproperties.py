@@ -14,6 +14,12 @@ _licenses.append(("CC-BY", "CC-BY", "Creative Commons Attribution",             
 _licenses.append(("AGPL",  "AGPL", "Affero Gnu Public License (don't use unless absolutely necessary)",     3))
 _licenseDescription = "Set an output license for the material. This will have no practical effect apart from being included in the written MHMAT file."
 
+_textures = []
+_textures.append(("NORMALIZE", "Normalize", "Copy to a name based on MHMAT filename", 1))
+_textures.append(("COPY", "Copy", "Copy without rename", 2))
+_textures.append(("LINK", "Link", "Link to original location, with absolute pathname", 3))
+_texturesDescription = "How do we handle texture file names and paths? Unless you know what you are doing, you will want to use normalize. This will copy all images to an appropriate location with an appropriate filename, valid for uploading to the asset repository."
+
 def extraProperties():
 
     # Object properties, normally set by MPFB
@@ -47,3 +53,6 @@ def extraProperties():
     bpy.types.Object.MhMsTransparent = BoolProperty(name="Transparent", description="If the material is to be rendered as a transparent. It is unlikely you want this, as the normal approach is using the alpha channel in the diffuse texture.", default=False)
     bpy.types.Object.MhMsDepthless = BoolProperty(name="Depthless", description="If the material is to be rendered as having no depth. It is unlikely you want this.", default=False)
     bpy.types.Object.MhMsSSSEnable = BoolProperty(name="SSS Enable", description="If the material is to be rendered with sub surface scattering.", default=False)
+
+    # Options
+    bpy.types.Object.MhMsTextures = bpy.props.EnumProperty(items=_textures, name="Textures", description=_texturesDescription, default="NORMALIZE")

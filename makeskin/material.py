@@ -7,7 +7,7 @@ import re, os
 from .utils import createEmptyMaterial
 from .nodehelper import NodeHelper
 from datetime import datetime
-import pprint
+import shutil
 
 class MHMat:
 
@@ -58,9 +58,34 @@ class MHMat:
             sett["bumpmapTexture"] = str(dtp).strip()
 
         sett["normalmapTexture"] = None
-        dtp = nh.findBumpMapTextureFilePath()
+        dtp = nh.findNormalMapTextureFilePath()
         if dtp and str(dtp).strip():
             sett["normalmapTexture"] = str(dtp).strip()
+
+    def copyTextures(self, mhmatFilenameAbsolute, normalize=True, adjustSettings=True):
+        matBaseName = os.path.basename(mhmatFilenameAbsolute)
+        matLoc = os.path.dirname(mhmatFilenameAbsolute)
+        (matBase, matExt) = os.path.splitext(matBaseName)
+        print("matBaseName " + matBaseName)
+        print("matBase " + matBase)
+        print("matLoc " + matLoc)
+        for key in self._textureKeys:
+            print(key)
+            origLoc = self.settings[key]
+            print(origLoc)
+            if origLoc:
+                (dummy, texExt) = os.path.splitext(origLoc)
+                if not normalize:
+                    baseName = os.path.basename(origLoc)
+                else:
+                    suffix = re.sub(r'Texture','',key)
+                    suffix = re.sub(r'map','',suffix)
+                    baseName = matBase + '_' + suffix + texExt
+                destLoc = os.path.join(matLoc, baseName)
+                print(origLoc + " ->" + destLoc)
+                shutil.copyfile(origLoc, destLoc)
+                if adjustSettings:
+                    self.settings[key] = baseName
 
     def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False):
         if obj is None:

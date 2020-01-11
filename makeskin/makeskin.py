@@ -50,5 +50,7 @@ class MHS_PT_MakeSkinPanel(bpy.types.Panel):
             writeBox.prop(obj, 'MhMsTransparent', text='Transparent')
             writeBox.prop(obj, 'MhMsDepthless', text='Depthless')
             writeBox.prop(obj, 'MhMsSSSEnable', text='Enable SSS')
+            writeBox.prop(obj, 'MhMsTextures', text='Paths:')
+
             writeBox.operator("makeskin.write_material", text="Save material")
 
