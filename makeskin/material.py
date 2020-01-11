@@ -56,11 +56,13 @@ class MHMat:
         dtp = nh.findBumpMapTextureFilePath()
         if dtp and str(dtp).strip():
             sett["bumpmapTexture"] = str(dtp).strip()
+            sett["bumpmapIntensity"] = nh.findBumpMapIntensity()
 
         sett["normalmapTexture"] = None
         dtp = nh.findNormalMapTextureFilePath()
         if dtp and str(dtp).strip():
             sett["normalmapTexture"] = str(dtp).strip()
+            sett["normalmapIntensity"] = nh.findNormalMapIntensity()
 
     def copyTextures(self, mhmatFilenameAbsolute, normalize=True, adjustSettings=True):
         matBaseName = os.path.basename(mhmatFilenameAbsolute)
@@ -267,6 +269,13 @@ class MHMat:
         mat = mat + "// Textures\n\n"
 
         for key in self._textureKeys:
+            if key in self.settings and not self.settings[key] is None:
+                mat = mat + key + " " + str(self.settings[key]) + "\n"
+
+        mat = mat + "\n"
+        mat = mat + "// Intensities\n\n"
+
+        for key in self._intensityKeys:
             if key in self.settings and not self.settings[key] is None:
                 mat = mat + key + " " + str(self.settings[key]) + "\n"
 

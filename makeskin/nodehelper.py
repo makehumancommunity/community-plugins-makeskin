@@ -182,17 +182,28 @@ class NodeHelper:
         fnode = self.findDiffuseTextureNode()
         return self._extractImageFilePath(fnode)
 
-    def findBumpMapTextureNode(self):
+    def findBumpMapNode(self):
         if not self._principledNode:
             return None
         nn = self._findNodeLinkedToPrincipled("Normal")
-        bmtn = None
         if not nn:
             print("The principled node did not have anything linked to its Normal input, so there is no bumpmap texture node")
             return None
         if isinstance(nn, ShaderNodeBump):
-            bmtn = self._findNodeLinkedTo(nn, "Height")
-        return bmtn
+            return nn
+        return None
+
+    def findBumpMapTextureNode(self):
+        nn = self.findBumpMapNode()
+        if not nn:
+            return None
+        return self._findNodeLinkedTo(nn, "Height")
+
+    def findBumpMapIntensity(self):
+        nn = self.findBumpMapNode()
+        if not nn:
+            return None
+        return nn.inputs['Strength'].default_value
 
     def findBumpMapTextureFilePath(self):
         if not self._principledNode:
@@ -200,26 +211,32 @@ class NodeHelper:
         fnode = self.findBumpMapTextureNode()
         return self._extractImageFilePath(fnode)
 
-    def findNormalMapTextureNode(self):
+    def findNormalMapNode(self):
         if not self._principledNode:
             return None
         nn = self._findNodeLinkedToPrincipled("Normal")
-        ntn = None
         if not nn:
             print("The principled node did not have anything linked to its Normal input, so there is no normalmap texture node")
             return None
         if isinstance(nn, ShaderNodeBump):
-            print("has bump")
             nn = self._findNodeLinkedTo(nn, "Normal")
             if not nn:
-                print("no bump link")
                 return None
         if isinstance(nn, ShaderNodeNormalMap):
-            ntn = self._findNodeLinkedTo(nn, "Color")
-        else:
-            print("not normal")
-            print(nn)
-        return ntn
+            return nn
+        return None
+
+    def findNormalMapTextureNode(self):
+        nn = self.findNormalMapNode()
+        if not nn:
+            return None
+        return self._findNodeLinkedTo(nn, "Color")
+
+    def findNormalMapIntensity(self):
+        nn = self.findNormalMapNode()
+        if not nn:
+            return None
+        return nn.inputs['Strength'].default_value
 
     def findNormalMapTextureFilePath(self):
         if not self._principledNode:
