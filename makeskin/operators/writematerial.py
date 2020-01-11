@@ -2,14 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+from bpy_extras.io_utils import ExportHelper
+from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 from ..material import MHMat
 from ..utils import hasMaterial
 
-class MHS_OT_WriteMaterialOperator(bpy.types.Operator):
+class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
     """Write material to MHMAT file"""
     bl_idname = "makeskin.write_material"
     bl_label = "Write material"
     bl_options = {'REGISTER'}
+
+    filename_ext = '.mhmat'
+
+    filter_glob: StringProperty(default='*.mhmat', options={'HIDDEN'})
 
     @classmethod
     def poll(self, context):
@@ -22,9 +28,8 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator):
     def execute(self, context):
 
         obj = context.active_object
-        scn = context.scene
 
-        fnAbsolute = "/tmp/hej.mhmat"
+        fnAbsolute = bpy.path.abspath(self.filepath)
 
         if not hasMaterial(obj):
             self.report({'ERROR'}, "Object does not have a material")
@@ -67,6 +72,8 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator):
             mhmat.copyTextures(fnAbsolute,normalize=False)
         # If handling is LINK, then paths are already correct
 
+        with open(fnAbsolute,'w') as f:
+            f.write(str(mhmat))
         print(mhmat)
         self.report({'INFO'}, "A material file was written")
 

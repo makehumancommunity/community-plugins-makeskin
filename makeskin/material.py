@@ -66,9 +66,6 @@ class MHMat:
         matBaseName = os.path.basename(mhmatFilenameAbsolute)
         matLoc = os.path.dirname(mhmatFilenameAbsolute)
         (matBase, matExt) = os.path.splitext(matBaseName)
-        print("matBaseName " + matBaseName)
-        print("matBase " + matBase)
-        print("matLoc " + matLoc)
         for key in self._textureKeys:
             print(key)
             origLoc = self.settings[key]
@@ -82,7 +79,6 @@ class MHMat:
                     suffix = re.sub(r'map','',suffix)
                     baseName = matBase + '_' + suffix + texExt
                 destLoc = os.path.join(matLoc, baseName)
-                print(origLoc + " ->" + destLoc)
                 shutil.copyfile(origLoc, destLoc)
                 if adjustSettings:
                     self.settings[key] = baseName
@@ -153,12 +149,12 @@ class MHMat:
         self._intensityKeys = [
 
             "diffuseIntensity",
-            "bumpMapIntensity",
-            "normalMapIntensity",
+            "bumpmapIntensity",
+            "normalmapIntensity",
             "displacementMapIntensity",
-            "specularMapIntensity",
-            "transparencyMapIntensity",
-            "aoMapIntensity"]
+            "specularmapIntensity",
+            "transparencymapIntensity",
+            "aomapIntensity"]
 
         self._sssKeys = [
             "sssEnabled",
@@ -210,8 +206,8 @@ class MHMat:
 
         # Sensible defaults for when not specified by object or mhmat
         self.settings["diffuseColor"] = [0.5, 0.5, 0.5]  # R, G, B
-        self.settings["specularColor"] = [0.5, 0.5, 0.5]  # R, G, B
-        self.settings["shininess"] = 0.5
+        self.settings["specularColor"] = [0.3, 0.3, 0.3]  # R, G, B
+        self.settings["shininess"] = 0.3
         self.settings["opacity"] = 1.0
         self.settings["transparent"] = False
         self.settings["alphaToCoverage"] = True
@@ -255,7 +251,7 @@ class MHMat:
         mat = mat + "// Metadata\n\n"
         for key in self._metadataKeys:
             if key in self.settings and not self.settings[key] is None:
-                mat = mat + key + " = " + str(self.settings[key]) + "\n"
+                mat = mat + key + " " + str(self.settings[key]) + "\n"
 
         mat = mat + "\n"
         mat = mat + "// Color shading attributes\n\n"
@@ -265,28 +261,28 @@ class MHMat:
                 r = self.settings[key][0]
                 g = self.settings[key][1]
                 b = self.settings[key][2]
-                mat = mat + key + " = %.4f %.4f %.4f\n" % (r, g, b)
+                mat = mat + key + " %.4f %.4f %.4f\n" % (r, g, b)
 
         mat = mat + "\n"
         mat = mat + "// Textures\n\n"
 
         for key in self._textureKeys:
             if key in self.settings and not self.settings[key] is None:
-                mat = mat + key + " = " + str(self.settings[key]) + "\n"
+                mat = mat + key + " " + str(self.settings[key]) + "\n"
 
         mat = mat + "\n"
         mat = mat + "// SSS\n\n"
 
         for key in self._sssKeys:
             if key in self.settings and not self.settings[key] is None:
-                mat = mat + key + " = " + str(self.settings[key]) + "\n"
+                mat = mat + key + " " + str(self.settings[key]) + "\n"
 
         mat = mat + "\n"
         mat = mat + "// Settings\n\n"
 
         for key in self._variousKeys:
             if key in self.settings and not self.settings[key] is None:
-                mat = mat + key + " = " + str(self.settings[key]) + "\n"
+                mat = mat + key + " " + str(self.settings[key]) + "\n"
 
         # TODO: Consider handling intensities, shaderConfig and shaderParam, although it's unclear how these could be represented in a node setup
 
