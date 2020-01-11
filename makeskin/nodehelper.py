@@ -3,15 +3,19 @@
 
 import bpy
 import bpy.types
-from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump
+from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump, ShaderNodeNormal
 import pprint, os
 
 _coords = dict()
 _coords["diffuseTexture"] = [-400.0, 300.0]
 _coords["normalMapTextureSolo"] = [-600.0, -300.0]
 _coords["normalMapSolo"] = [-250.0, -200.0]
-_coords["bumpMapTextureSolo"] = [-600.0, -300.0]
+_coords["bumpMapTextureSolo"] = [-600.0, 300.0]
 _coords["bumpMapSolo"] = [-250.0, -200.0]
+_coords["normalMapTextureDuo"] = [-800.0, -450.0]
+_coords["normalMapDuo"] = [-500.0, -350.0]
+_coords["bumpMapTextureDuo"] = [-600.0, -50.0]
+_coords["bumpMapDuo"] = [-250.0, -150.0]
 
 class NodeHelper:
 
@@ -78,13 +82,23 @@ class NodeHelper:
         return dt
 
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
-        # TODO: support bump maps
-        self.createOnlyNormal(normalImagePathAbsolute=normalImagePathAbsolute, linkToPrincipled=linkToPrincipled)
-
-    def createOnlyBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
+        (nmt, nm) = self._createNormal(normalImagePathAbsolute=normalImagePathAbsolute, linkToPrincipled=False)
+        nmt.location = _coords["normalMapTextureDuo"]
+        nm.location = _coords["normalMapDuo"]
+
+        (bmt, bm) = self._createBump(bumpImagePathAbsolute=bumpImagePathAbsolute, linkToPrincipled=False)
+        bmt.location = _coords["bumpMapTextureDuo"]
+        bm.location = _coords["bumpMapDuo"]
+
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(bm.outputs["Normal"], self._principledNode.inputs["Normal"])
+            self._nodetree.links.new(bmt.outputs["Color"], bm.inputs["Height"])
+            self._nodetree.links.new(nm.outputs["Normal"], bm.inputs["Normal"])
+            self._nodetree.links.new(nmt.outputs["Color"], nm.inputs["Color"])
+
+    def _createBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
         bmt = self._nodetree.nodes.new("ShaderNodeTexImage")
-        bmt.location = _coords["bumpMapTextureSolo"]
 
         if bumpImagePathAbsolute:
             fn = os.path.basename(bumpImagePathAbsolute)
@@ -97,17 +111,20 @@ class NodeHelper:
             bmt.image = image
 
         bm = self._nodetree.nodes.new("ShaderNodeBump")
-        bm.location = _coords["bumpMapSolo"]
 
         if linkToPrincipled and self._principledNode:
             self._nodetree.links.new(bm.outputs["Normal"], self._principledNode.inputs["Normal"])
             self._nodetree.links.new(bmt.outputs["Color"], bm.inputs["Height"])
-        return bmt
+        return (bmt, bm)
 
-    def createOnlyNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
+    def createOnlyBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
+        (bmt, bm) = self._createBump(bumpImagePathAbsolute=bumpImagePathAbsolute, linkToPrincipled=linkToPrincipled)
+        bmt.location = _coords["bumpMapTextureSolo"]
+        bm.location = _coords["bumpMapSolo"]
+
+    def _createNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
         nmt = self._nodetree.nodes.new("ShaderNodeTexImage")
-        nmt.location = _coords["normalMapTextureSolo"]
 
         if normalImagePathAbsolute:
             fn = os.path.basename(normalImagePathAbsolute)
@@ -120,24 +137,17 @@ class NodeHelper:
             nmt.image = image
 
         nm = self._nodetree.nodes.new("ShaderNodeNormalMap")
-        nm.location = _coords["normalMapSolo"]
 
         if linkToPrincipled and self._principledNode:
             self._nodetree.links.new(nm.outputs["Normal"], self._principledNode.inputs["Normal"])
             self._nodetree.links.new(nmt.outputs["Color"], nm.inputs["Color"])
-        return nmt
+        return (nmt, nm)
 
-    def findDiffuseTextureNode(self):
-        if not self._principledNode:
-            return None
-        dtn = self._findNodeLinkedToPrincipled("Base Color")
-        if not dtn:
-            print("The principled node did not have anything linked to its Base color input, so there is no diffuse texture node")
-            return None
-        if not isinstance(dtn, ShaderNodeTexImage):
-            print("The principled node had a link to its Base Color input, but the source was not an image texture. Giving up on finding a diffuse texture node.")
-            return None
-        return dtn
+    def createOnlyNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
+        (nmt, nm) = self._createNormal(normalImagePathAbsolute=normalImagePathAbsolute, linkToPrincipled=linkToPrincipled)
+        nmt.location = _coords["normalMapTextureSolo"]
+        nm.location = _coords["normalMapSolo"]
+        return nmt
 
     def _extractImageFilePath(self, textureNode):
         if not textureNode:
@@ -153,6 +163,18 @@ class NodeHelper:
         else:
             print("Found an image texture, but its image property was empty.")
         return None
+
+    def findDiffuseTextureNode(self):
+        if not self._principledNode:
+            return None
+        dtn = self._findNodeLinkedToPrincipled("Base Color")
+        if not dtn:
+            print("The principled node did not have anything linked to its Base color input, so there is no diffuse texture node")
+            return None
+        if not isinstance(dtn, ShaderNodeTexImage):
+            print("The principled node had a link to its Base Color input, but the source was not an image texture. Giving up on finding a diffuse texture node.")
+            return None
+        return dtn
 
     def findDiffuseTextureFilePath(self):
         if not self._principledNode:
@@ -176,4 +198,26 @@ class NodeHelper:
         if not self._principledNode:
             return None
         fnode = self.findBumpMapTextureNode()
+        return self._extractImageFilePath(fnode)
+
+    def findNormalMapTextureNode(self):
+        if not self._principledNode:
+            return None
+        nn = self._findNodeLinkedToPrincipled("Normal")
+        ntn = None
+        if not nn:
+            print("The principled node did not have anything linked to its Normal input, so there is no normalmap texture node")
+            return None
+        if isinstance(nn, ShaderNodeBump):
+            nn = self._findNodeLinkedTo(nn, "Normal")
+            if not nn:
+                return None
+        if isinstance(nn, ShaderNodeNormal):
+            ntn = self._findNodeLinkedTo(nn, "Color")
+        return ntn
+
+    def findNormalMapTextureFilePath(self):
+        if not self._principledNode:
+            return None
+        fnode = self.findNormalMapTextureNode()
         return self._extractImageFilePath(fnode)

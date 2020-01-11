@@ -57,6 +57,11 @@ class MHMat:
         if dtp and str(dtp).strip():
             sett["bumpmapTexture"] = str(dtp).strip()
 
+        sett["normalmapTexture"] = None
+        dtp = nh.findBumpMapTextureFilePath()
+        if dtp and str(dtp).strip():
+            sett["normalmapTexture"] = str(dtp).strip()
+
     def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False):
         if obj is None:
             return
