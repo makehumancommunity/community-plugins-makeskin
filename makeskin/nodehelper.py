@@ -39,6 +39,15 @@ class NodeHelper:
             return
         self._principledNode.inputs[socketName].default_value = socketValue
 
+    def _findNodeLinkedTo(self, nodeTarget, socketTarget):
+        srcNode = None
+        for link in self._nodetree.links:
+            if link.to_node == nodeTarget:
+                tsock = link.to_socket
+                if tsock.name == socketTarget:
+                    srcNode = link.from_node
+        return srcNode
+
     def _findNodeLinkedToPrincipled(self, principledSocketName):
         if not self._principledNode:
             return None
@@ -130,22 +139,41 @@ class NodeHelper:
             return None
         return dtn
 
+    def _extractImageFilePath(self, textureNode):
+        if not textureNode:
+            return None
+        if textureNode.image:
+            if textureNode.image.filepath or textureNode.image.filepath_raw:
+                if textureNode.image.filepath:
+                    return bpy.path.abspath(textureNode.image.filepath)
+                else:
+                    return bpy.path.abspath(textureNode.image.filepath_raw)
+            else:
+                print("Found image texture with an image property, but the image had an empty file path.")
+        else:
+            print("Found an image texture, but its image property was empty.")
+        return None
+
     def findDiffuseTextureFilePath(self):
         if not self._principledNode:
             return None
-        fnode = self.findDiffuseTextureFilePath()
-        if fnode:
-            if fnode.image:
-                if fnode.image.filepath or fnode.image.filepath_raw:
-                    if fnode.image.filepath:
-                        return fnode.image.filepath
-                    else:
-                        return fnode.image.filepath_raw
-                else:
-                    print("Found image texture with an image property, but the image had an empty file path. Giving up on finding a diffuse texture.")
-                    return None
-            else:
-                print("Found an image texture, but its image property was empty. Giving up on finding a diffuse texture.")
-                return None
-        print("There was no diffuse texture to be found")
-        return None
+        fnode = self.findDiffuseTextureNode()
+        return self._extractImageFilePath(fnode)
+
+    def findBumpMapTextureNode(self):
+        if not self._principledNode:
+            return None
+        nn = self._findNodeLinkedToPrincipled("Normal")
+        bmtn = None
+        if not nn:
+            print("The principled node did not have anything linked to its Normal input, so there is no bumpmap texture node")
+            return None
+        if isinstance(nn, ShaderNodeBump):
+            bmtn = self._findNodeLinkedTo(nn, "Height")
+        return bmtn
+
+    def findBumpMapTextureFilePath(self):
+        if not self._principledNode:
+            return None
+        fnode = self.findBumpMapTextureNode()
+        return self._extractImageFilePath(fnode)

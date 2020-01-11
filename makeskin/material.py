@@ -36,11 +36,26 @@ class MHMat:
                     raise ValueError("Only cycles/eevee materials are supported")
                 else:
                     self.nodehelper = NodeHelper(obj)
+                    self._parseNodeMaterial()
             else:
                 raise ValueError("Object does not have any material")
 
         if not fileName is None:
             self._parseFile(fileName)
+
+    def _parseNodeMaterial(self):
+        nh = self.nodehelper
+        sett = self.settings
+
+        sett["diffuseTexture"] = None
+        dtp = nh.findDiffuseTextureFilePath()
+        if dtp and str(dtp).strip():
+            sett["diffuseTexture"] = str(dtp).strip()
+
+        sett["bumpmapTexture"] = None
+        dtp = nh.findBumpMapTextureFilePath()
+        if dtp and str(dtp).strip():
+            sett["bumpmapTexture"] = str(dtp).strip()
 
     def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False):
         if obj is None:
