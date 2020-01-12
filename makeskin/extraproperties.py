@@ -20,6 +20,17 @@ _textures.append(("COPY", "Copy", "Copy without rename", 2))
 _textures.append(("LINK", "Link", "Link to original location, with absolute pathname", 3))
 _texturesDescription = "How do we handle texture file names and paths? Unless you know what you are doing, you will want to use normalize. This will copy all images to an appropriate location with an appropriate filename, valid for uploading to the asset repository."
 
+_litspheres = []
+_litspheres.append(("leather", "leather", "Leather litsphere. This is appropriate for all clothes, not only leather.", 1))
+_litspheres.append(("standard_skin", "standard skin", "Standard skin litsphere. This is appropriate for all skins.", 2))
+_litspheres.append(("african", "african skin", "African skin litsphere", 3))
+_litspheres.append(("asian", "asian skin", "Asian skin litsphere", 4))
+_litspheres.append(("caucasian", "caucasian skin", "Caucasian skin litsphere", 5))
+_litspheres.append(("toon01", "toon", "Toon skin litsphere", 6))
+_litspheres.append(("eye", "eye", "Eye litsphere", 7))
+_litspheres.append(("hair", "hair", "Hair litsphere", 8))
+_litsphereDescription = "A litsphere texture is used for emulate lighting and reflections inside MakeHuman. It thus has no effect outside MakeHuman. For any clothing (not just leather), you will want to use the \"leather\" litsphere."
+
 def extraProperties():
 
     # Object properties, normally set by MPFB
@@ -53,6 +64,8 @@ def extraProperties():
     bpy.types.Object.MhMsTransparent = BoolProperty(name="Transparent", description="If the material is to be rendered as a transparent. It is unlikely you want this, as the normal approach is using the alpha channel in the diffuse texture.", default=False)
     bpy.types.Object.MhMsDepthless = BoolProperty(name="Depthless", description="If the material is to be rendered as having no depth. It is unlikely you want this.", default=False)
     bpy.types.Object.MhMsSSSEnable = BoolProperty(name="SSS Enable", description="If the material is to be rendered with sub surface scattering.", default=False)
+    bpy.types.Object.MhMsUseLit = BoolProperty(name="Use Litsphere", description="Use the litsphere shader when rendering material in MakeHuman. This does not have any effect on materials outside MakeHuman", default=True)
 
     # Options
+    bpy.types.Object.MhMsLitsphere = bpy.props.EnumProperty(items=_litspheres, name="Litsphere", description=_litsphereDescription, default="leather")
     bpy.types.Object.MhMsTextures = bpy.props.EnumProperty(items=_textures, name="Textures", description=_texturesDescription, default="NORMALIZE")

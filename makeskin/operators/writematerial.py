@@ -72,6 +72,13 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
             mhmat.copyTextures(fnAbsolute,normalize=False)
         # If handling is LINK, then paths are already correct
 
+        if mhmat.settings["normalmapTexture"]:
+            mhmat.shaderConfig["normal"] = True
+        if mhmat.settings["bumpmapTexture"]:
+            mhmat.shaderConfig["bump"] = True
+        if obj.MhMsUseLit and obj.MhMsLitsphere:
+            mhmat.litSphere = obj.MhMsLitsphere
+
         with open(fnAbsolute,'w') as f:
             f.write(str(mhmat))
         print(mhmat)

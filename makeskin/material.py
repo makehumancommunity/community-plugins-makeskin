@@ -17,6 +17,7 @@ class MHMat:
             raise ValueError("You cannot construct from both file and object at the same time")
 
         self.settings = dict()
+        self.shaderConfig = dict()
         self._setupDefaultAndPlaceholders()
 
         # Internal variables for parsing object material
@@ -26,6 +27,7 @@ class MHMat:
 
         self.diffuseTexture = None
         self.nodehelper = None
+        self.litSphere = None
 
         if not obj is None:
             if len(obj.data.materials) > 0:
@@ -63,6 +65,13 @@ class MHMat:
         if dtp and str(dtp).strip():
             sett["normalmapTexture"] = str(dtp).strip()
             sett["normalmapIntensity"] = nh.findNormalMapIntensity()
+
+        r = 1.0 - nh.getPrincipledSocketDefaultValue('Roughness')
+        sett["shininess"] = r
+        sett["specularColor"] = [r, r, r]
+
+        d = nh.getPrincipledSocketDefaultValue('Base Color')
+        sett["diffuseColor"] = [d[0], d[1], d[2]]
 
     def copyTextures(self, mhmatFilenameAbsolute, normalize=True, adjustSettings=True):
         matBaseName = os.path.basename(mhmatFilenameAbsolute)
@@ -216,6 +225,15 @@ class MHMat:
         self.settings["backfaceCull"] = False
         self.settings["depthless"] = False
 
+        self.shaderConfig["ambientOcclusion"] = True
+        self.shaderConfig["normal"] = False
+        self.shaderConfig["bump"] = False
+        self.shaderConfig["displacement"] = False
+        self.shaderConfig["vertexColors"] = False
+        self.shaderConfig["spec"] = True
+        self.shaderConfig["transparency"] = True
+        self.shaderConfig["diffuse"] = True
+
     def _parseFile(self, fileName):
         full = os.path.abspath(fileName)
         location = os.path.dirname(full)
@@ -242,8 +260,12 @@ class MHMat:
                             if key in self._floatKeys:
                                 self.settings[key] = float(value)
                     else:
-                        print("no match")
-                        print(parsedLine)
+                        if parsedLine.startswith("shader"):
+                            pass
+                            # TODO: check for shaderConfig, shader and shaderParam
+                        else:
+                            print("no match")
+                            print(parsedLine)
                 line = f.readline()
         print(self)
             
@@ -293,7 +315,14 @@ class MHMat:
             if key in self.settings and not self.settings[key] is None:
                 mat = mat + key + " " + str(self.settings[key]) + "\n"
 
-        # TODO: Consider handling intensities, shaderConfig and shaderParam, although it's unclear how these could be represented in a node setup
+        mat = mat + "\n"
+        mat = mat + "// Shader properties (only affects how things look in MakeHuman)\n\n"
+
+        if self.litSphere:
+            mat = mat + "shader shaders/glsl/litsphere\n"
+            mat = mat + "shaderParam litsphereTexture litspheres/lit_" + str(self.litSphere) + ".png\n"
+        for key in self.shaderConfig.keys():
+            mat = mat + "shaderConfig " + key + " " + str(self.shaderConfig[key]) + "\n"
 
         mat = mat + "\n"
         mat = mat + "// The following settings would also have been valid, but do currently not have a value\n//\n"
