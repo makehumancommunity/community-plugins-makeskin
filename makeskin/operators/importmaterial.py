@@ -42,7 +42,8 @@ class MHS_OT_ImportMaterialOperator(bpy.types.Operator, ImportHelper):
         
         ##- Load Blend -##
         path = mhmat.settings["blendMaterial"]
-        blendMatLoad(path)
+        if path:
+            blendMatLoad(path)
 
         self.report({'INFO'}, "Material imported")
         return {'FINISHED'}
