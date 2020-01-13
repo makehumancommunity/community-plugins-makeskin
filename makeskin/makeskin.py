@@ -54,5 +54,7 @@ class MHS_PT_MakeSkinPanel(bpy.types.Panel):
             writeBox.prop(obj, 'MhMsUseLit', text='Use litsphere')
             writeBox.prop(obj, 'MhMsLitsphere', text='Litsphere texture')
 
+            writeBox.prop(obj, 'MhMsWriteBlendMaterial', text='Save Blender material')
+
             writeBox.operator("makeskin.write_material", text="Save material")
 
