@@ -40,12 +40,10 @@ def blendMatSave(path, fake_user=False):
   but may overwrite something already in it.
   """
   import bpy
-  path += '.mat.blend'
-  path = bpy.path.abspath('//'+path)
   obj = bpy.context.active_object
   mat = obj.material_slots[1].material
   # May need to be more carfull with overwrites.
-  bpy.data.libraries.write(path, {mat}, fake_user=fake_user)
+  bpy.data.libraries.write(str(path), {mat}, fake_user=fake_user)
   print('Wrote blend file into:', path)
   
 
