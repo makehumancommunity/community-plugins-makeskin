@@ -65,6 +65,7 @@ def extraProperties():
     bpy.types.Object.MhMsDepthless = BoolProperty(name="Depthless", description="If the material is to be rendered as having no depth. It is unlikely you want this.", default=False)
     bpy.types.Object.MhMsSSSEnable = BoolProperty(name="SSS Enable", description="If the material is to be rendered with sub surface scattering.", default=False)
     bpy.types.Object.MhMsUseLit = BoolProperty(name="Use Litsphere", description="Use the litsphere shader when rendering material in MakeHuman. This does not have any effect on materials outside MakeHuman", default=True)
+    bpy.types.Object.MhMsWriteBlendMaterial = BoolProperty(name="Write Blend material", description="Stores the second material on the active object in a blend file", default=False)
 
     # Options
     bpy.types.Object.MhMsLitsphere = bpy.props.EnumProperty(items=_litspheres, name="Litsphere", description=_litsphereDescription, default="leather")

@@ -5,7 +5,7 @@ import bpy
 from bpy_extras.io_utils import ExportHelper
 from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, CollectionProperty, FloatProperty
 from ..material import MHMat
-from ..utils import hasMaterial
+from ..utils import hasMaterial, blendMatSave
 
 class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
     """Write material to MHMAT file"""
@@ -62,6 +62,7 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
         mhmat.settings['transparent'] = obj.MhMsTransparent
         mhmat.settings['depthless'] = obj.MhMsDepthless
         mhmat.settings['sssEnable'] = obj.MhMsSSSEnable
+        mhmat.settings['writeBlendMaterial'] = obj.MhMsWriteBlendMaterial
 
         handling = "NORMALIZE"
         if obj.MhMsTextures:
@@ -78,6 +79,21 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
             mhmat.shaderConfig["bump"] = True
         if obj.MhMsUseLit and obj.MhMsLitsphere:
             mhmat.litSphere = obj.MhMsLitsphere
+        
+        ##- Save blend -##
+        if mhmat.settings["writeBlendMaterial"]:
+            try:  matName = obj.material_slots[1].name
+            except IndexError:
+              msg = "Object dose not have a second material."
+              self.report({'ERROR'}, msg)
+              raise IndexError(msg)
+
+            fileName = bpy.path.relpath(self.filepath).strip('//').rstrip('.mhmat')
+            # Make shure its materials with an s :(
+            path = fileName+'.mat.blend/materials/'+matName
+            mhmat.settings["blendMaterial"] = path
+            blendMatSave(fileName)
+
 
         with open(fnAbsolute,'w') as f:
             f.write(str(mhmat))

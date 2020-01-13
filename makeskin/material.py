@@ -155,7 +155,8 @@ class MHMat:
             "displacementmapTexture",
             "specularmapTexture",
             "transparencymapTexture",
-            "aomapTexture"]
+            "aomapTexture",
+            "blendMaterial"]
 
         self._intensityKeys = [
 

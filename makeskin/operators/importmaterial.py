@@ -39,6 +39,11 @@ class MHS_OT_ImportMaterialOperator(bpy.types.Operator, ImportHelper):
 
         mhmat = MHMat(fileName=self.filepath)
         mhmat.assignAsNodesMaterialForObj(obj)
+        
+        ##- Load Blend -##
+        path = mhmat.settings["blendMaterial"]
+        if path:
+            blendMatLoad(path)
 
         self.report({'INFO'}, "Material imported")
         return {'FINISHED'}
