@@ -87,12 +87,11 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
               msg = "Object dose not have a second material."
               self.report({'ERROR'}, msg)
               raise IndexError(msg)
-
-            fileName = bpy.path.relpath(self.filepath).strip('//').rstrip('.mhmat')
-            # Make shure its materials with an s :(
-            path = fileName+'.mat.blend/materials/'+matName
-            mhmat.settings["blendMaterial"] = path
-            blendMatSave(fileName)
+            
+            from pathlib import Path
+            path = Path(fnAbsolute).with_suffix('.mat.blend')
+            mhmat.settings["blendMaterial"] = path.name+'/materials/'+matName
+            blendMatSave(path)
 
 
         with open(fnAbsolute,'w') as f:
