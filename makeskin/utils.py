@@ -48,7 +48,7 @@ def blendMatSave(path, fake_user=False):
   
 
 
-def blendMatLoad(path):
+def blendMatLoad(path, obj=None):
   """
   Load a materiral from a blend file determined by path
   to a new material slot.
@@ -61,6 +61,10 @@ def blendMatLoad(path):
 
   mat = getattr(outBasket, dirName)[0]
   mat.make_local()
-  obj = bpy.context.active_object
+
+  if obj is None:
+    obj = bpy.context.active_object
+
   obj.data.materials.append(mat)
+  return mat
 
