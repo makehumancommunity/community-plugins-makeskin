@@ -8,6 +8,8 @@ from bpy.utils import register_class, unregister_class
 from .extraproperties import extraProperties
 from .makeskin import MHS_PT_MakeSkinPanel
 from .operators import *
+from .material import MHMat
+from .utils import blendMatLoad
 
 bl_info = {
     "name": "MakeSkin",
@@ -19,13 +21,17 @@ bl_info = {
     'wiki_url': "http://www.makehumancommunity.org/",
     "category": "MakeHuman"}
 
+MAKESKIN_VERSION = 20200116
 
 MAKESKIN_CLASSES = []
 MAKESKIN_CLASSES.extend(OPERATOR_CLASSES)
 MAKESKIN_CLASSES.append(MHS_PT_MakeSkinPanel)
 
 __all__ = [
-    "MAKESKIN_CLASSES"
+    "MAKESKIN_CLASSES",
+    "MAKESKIN_VERSION",
+    "MHMat",
+    "blendMatLoad"
 ]
 
 def register():
