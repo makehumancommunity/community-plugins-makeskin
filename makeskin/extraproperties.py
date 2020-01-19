@@ -42,6 +42,8 @@ def extraProperties():
     bpy.types.Scene.MhMsCreateDiffuse = BoolProperty(name="Create diffuse placeholder", description="Create a placeholder for a diffuse texture", default=True)
     bpy.types.Scene.MhMsCreateNormal = BoolProperty(name="Create normal map placeholder", description="Create a placeholder for a normal map", default=False)
     bpy.types.Scene.MhMsCreateBump = BoolProperty(name="Create bump map placeholder", description="Create a placeholder for a bump map", default=False)
+    bpy.types.Scene.MhMsCreateTransp = BoolProperty(name="Create transparency map placeholder", description="Create a placeholder for a transparency map", default=False)
+    bpy.types.Scene.MhMsCreateDisp = BoolProperty(name="Create displacement map placeholder", description="Create a placeholder for a displacement map", default=False)
 
     bpy.types.Scene.MhMsOverwrite1 = BoolProperty(name="Overwrite existing (create)", description="Overwrite existing material(s) on object", default=False)
     bpy.types.Scene.MhMsOverwrite2 = BoolProperty(name="Overwrite existing (import)", description="Overwrite existing material(s) on object", default=False)
@@ -64,6 +66,7 @@ def extraProperties():
     bpy.types.Object.MhMsTransparent = BoolProperty(name="Transparent", description="If the material is to be rendered as a transparent. It is unlikely you want this, as the normal approach is using the alpha channel in the diffuse texture.", default=False)
     bpy.types.Object.MhMsDepthless = BoolProperty(name="Depthless", description="If the material is to be rendered as having no depth. It is unlikely you want this.", default=False)
     bpy.types.Object.MhMsSSSEnable = BoolProperty(name="SSS Enable", description="If the material is to be rendered with sub surface scattering.", default=False)
+    bpy.types.Object.MhMsAutoBlend = BoolProperty(name="Auto blend skin", description="Autoadjust lit sphere and diffuse color to match skin tone", default=False)
     bpy.types.Object.MhMsUseLit = BoolProperty(name="Use Litsphere", description="Use the litsphere shader when rendering material in MakeHuman. This does not have any effect on materials outside MakeHuman", default=True)
     bpy.types.Object.MhMsWriteBlendMaterial = BoolProperty(name="Write Blend material", description="Stores the second material on the active object in a blend file", default=False)
 

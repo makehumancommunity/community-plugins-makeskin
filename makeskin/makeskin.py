@@ -23,6 +23,8 @@ class MHS_PT_MakeSkinPanel(bpy.types.Panel):
             createBox.prop(scn, 'MhMsCreateDiffuse', text="Diffuse texture")
             createBox.prop(scn, 'MhMsCreateNormal', text="Normal map")
             createBox.prop(scn, 'MhMsCreateBump', text="Bump map")
+            createBox.prop(scn, 'MhMsCreateTransp', text="Transparency map")
+            createBox.prop(scn, 'MhMsCreateDisp', text="Displacement map")
             createBox.prop(scn, 'MhMsOverwrite1', text="Overwrite existing")
             createBox.operator("makeskin.create_material", text="Create material")
 
@@ -50,6 +52,7 @@ class MHS_PT_MakeSkinPanel(bpy.types.Panel):
             writeBox.prop(obj, 'MhMsTransparent', text='Transparent')
             writeBox.prop(obj, 'MhMsDepthless', text='Depthless')
             writeBox.prop(obj, 'MhMsSSSEnable', text='Enable SSS')
+            writeBox.prop(obj, 'MhMsAutoBlend', text='Auto blend')
             writeBox.prop(obj, 'MhMsTextures', text='Paths:')
             writeBox.prop(obj, 'MhMsUseLit', text='Use litsphere')
             writeBox.prop(obj, 'MhMsLitsphere', text='Litsphere texture')

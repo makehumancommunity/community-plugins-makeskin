@@ -145,7 +145,8 @@ class MHMat:
             "diffuseColor",
             "specularColor",
             "emissiveColor",
-            "ambientColor"]
+            "ambientColor",
+            "viewPortColor"]
 
         self._textureKeys = [
 
@@ -185,7 +186,8 @@ class MHMat:
             "backfaceCull",
             "depthless",
             "castShadows",
-            "receiveShadows"]
+            "receiveShadows",
+            "autoBlendSkin"]
 
         self._boolKeys = [
             "shadeless",
@@ -195,7 +197,8 @@ class MHMat:
             "depthless",
             "castShadows",
             "receiveShadows",
-            "sssEnable"
+            "sssEnable",
+            "autoBlendSkin"
         ]
 
         self._floatKeys = [

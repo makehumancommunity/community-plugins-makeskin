@@ -42,6 +42,7 @@ several keys that are supported by MHMAT, but which makes no visible difference 
 | specularColor               | PARTIAL                 | -                  | YES            | The color of specular highlights. This is not supported by nodes materials.            |
 | emissiveColor               | -                       | YES                | ?              | What light (if any) is emitted by the material.            |
 | ambientColor                | -                       | -                  | ?              | Color used for simulating ambient light. This is not supported by nodes materials            |
+| viewPortColor               | -                       | YES                | -              | What color to use for material when displaying object in viewport            |
 | diffuseTexture              | YES                     | YES                | YES            | The image file used for diffuse color texturing            |
 | bumpmapTexture              | YES                     | YES                | -              | The image file used for bump mapping. No shaders in MH are able to represent this visually.            |
 | normalmapTexture            | YES                     | YES                | YES            | The image file used for normal mapping.            |
@@ -72,6 +73,7 @@ several keys that are supported by MHMAT, but which makes no visible difference 
 | depthless                   | YES                     | -                  | ?              | ?            |
 | castShadows                 | YES                     | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |
 | receiveShadows              | YES                     | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |
+| autoBlendSkin               | YES                     | -                  | ?              | When using a litsphere, autoadjust diffuse and litsphere texture for skin tone            |
 | litsphere (shader)          | YES                     | -                  | YES            | Use the "litsphere" shader when rendering in MakeHuman            |
 | litsphere texture (param)   | YES                     | -                  | YES            | When using litsphere, use this texture to emulate reflections            |
 | normalmap (shader)          | -                       | -                  | YES            | Use the "normalmap" shader when rendering in MakeHuman            |
