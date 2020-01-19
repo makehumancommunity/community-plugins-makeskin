@@ -45,6 +45,31 @@ class MHMat:
         if not fileName is None:
             self._parseFile(fileName)
 
+    def checkAllTexturesAreSaved(self):
+
+        nh = self.nodehelper
+
+        pre = "There is "
+        post = " texture node, but it doesn't point at a physical file. You will need to save the image to a file before trying to save the material."
+
+        tn = nh.findDiffuseTextureNode()
+        if tn and not nh.findDiffuseTextureFilePath():
+            return pre + "a diffuse image " + post
+
+        tn = nh.findNormalMapTextureNode()
+        if tn and not nh.findNormalMapTextureFilePath():
+            return pre + "a normal map " + post
+
+        tn = nh.findBumpMapTextureNode()
+        if tn and not nh.findBumpMapTextureFilePath():
+            return pre + "a bump map " + post
+
+        tn = nh.findTransparencyTextureNode()
+        if tn and not nh.findTransparencyTextureFilePath():
+            return pre + "a transparency map " + post
+
+        return ""
+
     def _parseNodeMaterial(self):
 
         sett = self.settings
@@ -62,6 +87,11 @@ class MHMat:
         dtp = nh.findDiffuseTextureFilePath()
         if dtp and str(dtp).strip():
             sett["diffuseTexture"] = str(dtp).strip()
+
+        sett["transparencymapTexture"] = None
+        dtp = nh.findTransparencyTextureFilePath()
+        if dtp and str(dtp).strip():
+            sett["transparencymapTexture"] = str(dtp).strip()
 
         sett["bumpmapTexture"] = None
         dtp = nh.findBumpMapTextureFilePath()
@@ -103,7 +133,7 @@ class MHMat:
                 if adjustSettings:
                     self.settings[key] = baseName
 
-    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False):
+    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False):
         if obj is None:
             return
         now = datetime.now()
@@ -113,11 +143,14 @@ class MHMat:
         if self.settings["diffuseTexture"] or diffusePH:
             self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
 
+        if self.settings["transparencymapTexture"] or transpPH:
+            self.nodehelper.createTransparencyTextureNode(self.settings["transparencymapTexture"])
+
         if self.settings["diffuseColor"] is not None:
             col = self.settings["diffuseColor"]
             col.append(1.0)
             self.nodehelper.setPrincipledSocketDefaultValue("Base Color", col)
-            
+
         if self.settings["viewPortColor"] is not None:
             col = self.settings["viewPortColor"]
             col.append(1.0)

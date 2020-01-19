@@ -37,6 +37,11 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
 
         mhmat = MHMat(obj)
 
+        checkImg = mhmat.checkAllTexturesAreSaved()
+        if checkImg:
+            self.report({'ERROR'}, checkImg)
+            return {'FINISHED'}
+
         if obj.MhMsName:
             mhmat.settings['name'] = obj.MhMsName
 

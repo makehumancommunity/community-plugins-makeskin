@@ -8,6 +8,7 @@ import pprint, os
 
 _coords = dict()
 _coords["diffuseTexture"] = [-400.0, 300.0]
+_coords["transparencyTexture"] = [-800.0, 100.0]
 _coords["normalMapTextureSolo"] = [-600.0, -300.0]
 _coords["normalMapSolo"] = [-250.0, -200.0]
 _coords["bumpMapTextureSolo"] = [-600.0, 300.0]
@@ -60,6 +61,25 @@ class NodeHelper:
                 tsock = link.to_socket
                 if tsock.name == principledSocketName:
                     return link.from_node
+
+    def createTransparencyTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
+        global _coords
+        dt = self._nodetree.nodes.new("ShaderNodeTexImage")
+        dt.location = _coords["transparencyTexture"]
+
+        if imagePathAbsolute:
+            fn = os.path.basename(imagePathAbsolute)
+            if fn in bpy.data.images:
+                print("image existed: " + imagePathAbsolute)
+                image = bpy.data.images[fn]
+            else:
+                image = bpy.data.images.load(imagePathAbsolute)
+            image.colorspace_settings.name = "sRGB"
+            dt.image = image
+
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(dt.outputs["Color"], self._principledNode.inputs["Transmission"])
+        return dt
 
     def createDiffuseTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
         global _coords
@@ -163,6 +183,24 @@ class NodeHelper:
         else:
             print("Found an image texture, but its image property was empty.")
         return None
+
+    def findTransparencyTextureNode(self):
+        if not self._principledNode:
+            return None
+        dtn = self._findNodeLinkedToPrincipled("Transmission")
+        if not dtn:
+            print("The principled node did not have anything linked to its Transmission input, so there is no transparency texture node")
+            return None
+        if not isinstance(dtn, ShaderNodeTexImage):
+            print("The principled node had a link to its Transmission input, but the source was not an image texture. Giving up on finding a transparency texture node.")
+            return None
+        return dtn
+
+    def findTransparencyTextureFilePath(self):
+        if not self._principledNode:
+            return None
+        fnode = self.findTransparencyTextureNode()
+        return self._extractImageFilePath(fnode)
 
     def findDiffuseTextureNode(self):
         if not self._principledNode:

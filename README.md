@@ -43,12 +43,12 @@ several keys that are supported by MHMAT, but which makes no visible difference 
 | emissiveColor               | -                       | YES                | ?              | What light (if any) is emitted by the material.            |
 | ambientColor                | -                       | -                  | ?              | Color used for simulating ambient light. This is not supported by nodes materials            |
 | viewPortColor               | -                       | YES                | -              | What color to use for material when displaying object in viewport            |
-| diffuseTexture              | YES                     | YES                | YES            | The image file used for diffuse color texturing            |
+| diffuseTexture              | YES                     | YES                | YES            | The image file used for diffuse color texturing. This also uses the texture's alpha channel to map for transparency.            |
 | bumpmapTexture              | YES                     | YES                | -              | The image file used for bump mapping. No shaders in MH are able to represent this visually.            |
 | normalmapTexture            | YES                     | YES                | YES            | The image file used for normal mapping.            |
 | displacementmapTexture      | -                       | YES                | ?              | The image file used for displacement mapping.             |
 | specularmapTexture          | -                       | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |
-| transparencymapTexture      | -                       | YES                | ?              | (It'll have to be further investigated what this does, if anything... We already have an alpha channel in the diffuse texture)            |
+| transparencymapTexture      | YES                     | YES                | -              | The image file used for transparency mapping. This maps onto the principled's "Transmission" socket, whereas the diffuseTexture alpha channel maps on the "Alpha". The transparency map is ignored in MakeHuman (whereas the alpha channel works) |
 | aomapTexture                | -                       | -                  | ?              | The image file used for ambient occlusion mapping. This is not supported by node materials.            |
 | blendMaterial *             | YES                     | YES                | -              | A file name pointing at a .blend file with a complete blender material. This is supported by MakeSkin, but not actually a part of the MHMAT spec.            |
 | diffuseIntensity            | -                       | -                  | YES            | How much weight should be assigned to the diffuse texture (vs the diffuseColor key). Default is 1.0.            |
