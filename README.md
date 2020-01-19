@@ -67,7 +67,7 @@ several keys that are supported by MHMAT, but which makes no visible difference 
 | shadeless                   | YES                     | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |
 | wireframe                   | YES                     | -                  | YES            | Whether to render the material as a wireframe in MH. Doesn't have any correspondence in blender.            |
 | transparent                 | YES                     | -                  | ?              | Should we use transparency at all? (It'll have to be investigated what this actually does)            |
-| alphaToCoverage             | YES                     | -                  | ?              | ?            |
+| alphaToCoverage             | YES                     | -                  | -              | Use A2C rendering if supported by graphics card (this is a hardware optimization and makes no visible difference)            |
 | backfaceCull                | YES                     | -                  | YES            | Should we render both sides of a face or remove ("cull") the back side when rendering? This is not a material property in blender.           |
 | depthless                   | YES                     | -                  | ?              | ?            |
 | castShadows                 | YES                     | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |

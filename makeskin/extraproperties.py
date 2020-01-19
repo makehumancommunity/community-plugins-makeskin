@@ -58,7 +58,7 @@ def extraProperties():
     bpy.types.Object.MhMsBackfaceCull = BoolProperty(name="Backface culling", description="If the back side of faces with the material should be invisible. This has no effect in exports, but may be important in MH", default=True)
     bpy.types.Object.MhMsCastShadows = BoolProperty(name="Cast shadows", description="If the material casts shadows. This has no effect in exports.", default=True)
     bpy.types.Object.MhMsReceiveShadows = BoolProperty(name="Receive shadows", description="If the material receives shadows. This has no effect in exports.", default=True)
-    bpy.types.Object.MhMsAlphaToCoverage = BoolProperty(name="AlphaToCoverage", description="I have no idea what this does, but it might be important", default=True)
+    bpy.types.Object.MhMsAlphaToCoverage = BoolProperty(name="AlphaToCoverage", description="Use A2C hardware acceleration for rendering transparency in this material", default=True)
     bpy.types.Object.MhMsShadeless = BoolProperty(name="Shadeless", description="If the material is shadeless. It is unlikely you want this.", default=False)
     bpy.types.Object.MhMsWireframe = BoolProperty(name="Wireframe", description="If the material is to be rendered as a wireframe. It is unlikely you want this.", default=False)
     bpy.types.Object.MhMsTransparent = BoolProperty(name="Transparent", description="If the material is to be rendered as a transparent. It is unlikely you want this, as the normal approach is using the alpha channel in the diffuse texture.", default=False)
