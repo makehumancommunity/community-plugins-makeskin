@@ -62,6 +62,7 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
         mhmat.settings['transparent'] = obj.MhMsTransparent
         mhmat.settings['depthless'] = obj.MhMsDepthless
         mhmat.settings['sssEnable'] = obj.MhMsSSSEnable
+        mhmat.settings['autoBlendSkin'] = obj.MhMsAutoBlend
         mhmat.settings['writeBlendMaterial'] = obj.MhMsWriteBlendMaterial
 
         handling = "NORMALIZE"

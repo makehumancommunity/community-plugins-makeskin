@@ -46,8 +46,17 @@ class MHMat:
             self._parseFile(fileName)
 
     def _parseNodeMaterial(self):
-        nh = self.nodehelper
+
         sett = self.settings
+
+        # Material properties, i.e not the node setup
+
+        dc = self._blenderMaterial.diffuse_color
+        sett["viewPortColor"] = [ dc[0], dc[1], dc[2] ]
+
+        # Everything else should be from nodes
+
+        nh = self.nodehelper
 
         sett["diffuseTexture"] = None
         dtp = nh.findDiffuseTextureFilePath()
@@ -107,7 +116,11 @@ class MHMat:
         if self.settings["diffuseColor"] is not None:
             col = self.settings["diffuseColor"]
             col.append(1.0)
-            self.nodehelper.setPrincipledSocketDefaultValue("Base Color", self.settings["diffuseColor"])
+            self.nodehelper.setPrincipledSocketDefaultValue("Base Color", col)
+            
+        if self.settings["viewPortColor"] is not None:
+            col = self.settings["viewPortColor"]
+            col.append(1.0)
             mat.diffuse_color = col
 
         if self.settings["shininess"] is not None:
