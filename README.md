@@ -38,11 +38,11 @@ several keys that are supported by MHMAT, but which makes no visible difference 
 | [license](docs/license.md)  | YES                     | -                  | -              | License is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
 | [homepage](docs/homepage.md) | YES                    | -                  | -              | Homepage is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
 | [author](docs/author.md)    | YES                     | -                  | -              | Author is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
-| diffuseColor                | YES                     | YES                | YES            | This is the color of the material. It is usually overwritten by the diffuseTexture.            |
-| specularColor               | PARTIAL                 | -                  | YES            | The color of specular highlights. This is not supported by nodes materials.            |
-| emissiveColor               | -                       | YES                | ?              | What light (if any) is emitted by the material.            |
-| ambientColor                | -                       | -                  | ?              | Color used for simulating ambient light. This is not supported by nodes materials            |
-| viewPortColor               | -                       | YES                | -              | What color to use for material when displaying object in viewport            |
+| [diffuseColor](docs/diffuseColor.md)  | YES                     | YES                | YES            | This is the color of the material. It is usually overwritten by the diffuseTexture.            |
+| [specularColor](docs/specularColor.md)   | PARTIAL                 | -                  | YES            | The color of specular highlights. This is not supported by nodes materials.            |
+| [emissiveColor](docs/emissiveColor.md)   | -                       | YES                | ?              | What light (if any) is emitted by the material.            |
+| [ambientColor](docs/ambientColor.md)     | -                       | -                  | ?              | Color used for simulating ambient light. This is not supported by nodes materials            |
+| [viewPortColor](docs/viewPortColor.md)   | -                       | YES                | -              | What color to use for material when displaying object in viewport            |
 | diffuseTexture              | YES                     | YES                | YES            | The image file used for diffuse color texturing. This also uses the texture's alpha channel to map for transparency.            |
 | bumpmapTexture              | YES                     | YES                | -              | The image file used for bump mapping. No shaders in MH are able to represent this visually.            |
 | normalmapTexture            | YES                     | YES                | YES            | The image file used for normal mapping.            |
