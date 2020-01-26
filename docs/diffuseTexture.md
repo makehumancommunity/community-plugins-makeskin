@@ -14,6 +14,11 @@ most primitive ones.
 If you want a plain color covering the entire surface, you do not need a diffuseTexture. 
 In those cases you can use the [diffuseColor](diffuseColor.md) setting instead.
 
+The diffuseTexture can also cater for primitive transparency. The alpha channel is 
+preserved in both blender and MakeHuman. If you want transparency which also takes
+IOR etc into account, see [transparencymapTexture](transparencymapTexture.md). But only
+the diffuseTexture alpha transparency is shown in MakeHuman.
+
 ## Example
 
     diffuseTexture mycharacter_diffuse.png
