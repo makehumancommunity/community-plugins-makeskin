@@ -29,16 +29,16 @@ difference in MakeHuman, under the right conditions (not all shaders in MH suppo
 It should be especially noted that the MHMAT model is wider than what is actually implemented in MakeHuman, so there are 
 several keys that are supported by MHMAT, but which makes no visible difference at all in MakeHuman.
 
-| MHMAT key                   | Implemented in MakeSkin | Visible in Blender | Visible in MH  | Description |  
-| :-------------------------- | :---------------------: | :----------------: | :------------: | ----------: |
-| [tag](docs/tag.md)          | PARTIAL                 | -                  | YES            | Tags are used for filtering in MakeHuman. Materials support multiple tags, but MakeSkin currently only has support for one   |
-| [name](docs/name.md)        | YES                     | -                  | -              | Name is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
-| [description](docs/description.md) | YES              | -                  | -              | Description is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
-| [uuid](docs/uuid.md)        | YES                     | -                  | ?              | UUID is used for telling materials apart. It is unclear if this is ever used though.            |
-| [license](docs/license.md)  | YES                     | -                  | -              | License is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
-| [homepage](docs/homepage.md) | YES                    | -                  | -              | Homepage is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
-| [author](docs/author.md)    | YES                     | -                  | -              | Author is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
-| [diffuseColor](docs/diffuseColor.md)  | YES                     | YES                | YES            | This is the color of the material. It is usually overwritten by the diffuseTexture.            |
+| MHMAT key                                | Implemented in MakeSkin | Visible in Blender | Visible in MH  | Description |  
+| :--------------------------------------- | :---------------------: | :----------------: | :------------: | :---------- |
+| [tag](docs/tag.md)                       | PARTIAL                 | -                  | YES            | Tags are used for filtering in MakeHuman. Materials support multiple tags, but MakeSkin currently only has support for one   |
+| [name](docs/name.md)                     | YES                     | -                  | -              | Name is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
+| [description](docs/description.md)       | YES                     | -                  | -              | Description is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
+| [uuid](docs/uuid.md)                     | YES                     | -                  | ?              | UUID is used for telling materials apart. It is unclear if this is ever used though.            |
+| [license](docs/license.md)               | YES                     | -                  | -              | License is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
+| [homepage](docs/homepage.md)             | YES                     | -                  | -              | Homepage is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
+| [author](docs/author.md)                 | YES                     | -                  | -              | Author is a simple metadata string in MHMAT files. It isn't used for anything in practice.             |
+| [diffuseColor](docs/diffuseColor.md)     | YES                     | YES                | YES            | This is the color of the material. It is usually overwritten by the diffuseTexture.            |
 | [specularColor](docs/specularColor.md)   | PARTIAL                 | -                  | YES            | The color of specular highlights. This is not supported by nodes materials.            |
 | [emissiveColor](docs/emissiveColor.md)   | -                       | YES                | ?              | What light (if any) is emitted by the material.            |
 | [ambientColor](docs/ambientColor.md)     | -                       | -                  | ?              | Color used for simulating ambient light. This is not supported by nodes materials            |
