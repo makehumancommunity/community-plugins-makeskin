@@ -3,7 +3,7 @@
 
 import bpy
 import bpy.types
-from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump, ShaderNodeNormalMap
+from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump, ShaderNodeNormalMap, ShaderNodeDisplacement
 import pprint, os
 
 _coords = dict()
@@ -17,6 +17,8 @@ _coords["normalMapTextureDuo"] = [-800.0, -450.0]
 _coords["normalMapDuo"] = [-500.0, -350.0]
 _coords["bumpMapTextureDuo"] = [-600.0, -50.0]
 _coords["bumpMapDuo"] = [-250.0, -150.0]
+_coords["displacement"] = [-0.0, -350.0]
+_coords["displacementTexture"] = [-300.0, -550.0]
 
 class NodeHelper:
 
@@ -29,10 +31,13 @@ class NodeHelper:
         self._diffuseTextureNode = None
         self._normalmapTextureNode = None
         self._bumpmapTextureNode = None
+        self._outputNode = None
 
         for node in self._nodetree.nodes:
             if isinstance(node, ShaderNodeBsdfPrincipled):
                 self._principledNode = node
+            if node.type == "OUTPUT_MATERIAL":
+                self._outputNode = node
 
     def getPrincipledSocketDefaultValue(self, socketName):
         if not self._principledNode:
@@ -79,6 +84,30 @@ class NodeHelper:
 
         if linkToPrincipled and self._principledNode:
             self._nodetree.links.new(dt.outputs["Color"], self._principledNode.inputs["Transmission"])
+        return dt
+
+    def createDisplacementTextureNode(self, imagePathAbsolute=None):
+
+        global _coords
+        dis = self._nodetree.nodes.new("ShaderNodeDisplacement")
+        dis.location = _coords["displacement"]
+
+        dt = self._nodetree.nodes.new("ShaderNodeTexImage")
+        dt.location = _coords["displacementTexture"]
+
+        if imagePathAbsolute:
+            fn = os.path.basename(imagePathAbsolute)
+            if fn in bpy.data.images:
+                print("image existed: " + imagePathAbsolute)
+                image = bpy.data.images[fn]
+            else:
+                image = bpy.data.images.load(imagePathAbsolute)
+            image.colorspace_settings.name = "sRGB"
+            dt.image = image
+
+        self._nodetree.links.new(dis.outputs["Displacement"], self._outputNode.inputs["Displacement"])
+        self._nodetree.links.new(dt.outputs["Color"], dis.inputs["Height"])
+
         return dt
 
     def createDiffuseTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
@@ -220,6 +249,32 @@ class NodeHelper:
         fnode = self.findDiffuseTextureNode()
         return self._extractImageFilePath(fnode)
 
+    def findDisplacementNode(self):
+        if not self._outputNode:
+            return None
+        for link in self._nodetree.links:
+            if link.to_node == self._outputNode:
+                tsock = link.to_socket
+                if tsock.name == "Displacement":
+                    return link.from_node
+        return None
+
+    def findDisplacementTextureNode(self):
+        dn = self.findDisplacementNode()
+        if not dn:
+            return None
+
+        for link in self._nodetree.links:
+            if link.to_node == dn:
+                tsock = link.to_socket
+                if tsock.name == "Height":
+                    return link.from_node
+        return None
+
+    def findDisplacementTextureFilePath(self):
+        fnode = self.findDisplacementTextureNode()
+        return self._extractImageFilePath(fnode)
+
     def findBumpMapNode(self):
         if not self._principledNode:
             return None
@@ -242,6 +297,12 @@ class NodeHelper:
         if not nn:
             return None
         return nn.inputs['Strength'].default_value
+
+    def findDisplacementMapIntensity(self):
+        nn = self.findDisplacementNode()
+        if not nn:
+            return None
+        return nn.inputs['Scale'].default_value
 
     def findBumpMapTextureFilePath(self):
         if not self._principledNode:

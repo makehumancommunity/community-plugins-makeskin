@@ -37,9 +37,10 @@ class MHS_OT_CreateMaterialOperator(bpy.types.Operator):
         nPH = scn.MhMsCreateNormal
         bPH = scn.MhMsCreateBump
         tPH = scn.MhMsCreateTransp
+        disPH = scn.MhMsCreateDisp
 
         mhmat = MHMat()
-        mhmat.assignAsNodesMaterialForObj(obj, diffusePH=dPH, normalPH=nPH, bumpPH=bPH, transpPH=tPH)
+        mhmat.assignAsNodesMaterialForObj(obj, diffusePH=dPH, normalPH=nPH, bumpPH=bPH, transpPH=tPH, displacePH=disPH)
 
         self.report({'INFO'}, "A template material was created")
         return {'FINISHED'}

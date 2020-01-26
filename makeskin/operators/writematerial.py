@@ -85,6 +85,8 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
             mhmat.shaderConfig["bump"] = True
         if obj.MhMsUseLit and obj.MhMsLitsphere:
             mhmat.litSphere = obj.MhMsLitsphere
+        if mhmat.settings["displacementmapTexture"]:
+            mhmat.shaderConfig["displacement"] = True
         
         ##- Save blend -##
         if mhmat.settings["writeBlendMaterial"]:

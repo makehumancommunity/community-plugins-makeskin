@@ -105,6 +105,12 @@ class MHMat:
             sett["normalmapTexture"] = str(dtp).strip()
             sett["normalmapIntensity"] = nh.findNormalMapIntensity()
 
+        sett["displacementmapTexture"] = None
+        dtp = nh.findDisplacementTextureFilePath()
+        if dtp and str(dtp).strip():
+            sett["displacementmapTexture"] = str(dtp).strip()
+            sett["displacementmapIntensity"] = nh.findDisplacementMapIntensity()
+
         r = 1.0 - nh.getPrincipledSocketDefaultValue('Roughness')
         sett["shininess"] = r
         sett["specularColor"] = [r, r, r]
@@ -133,7 +139,7 @@ class MHMat:
                 if adjustSettings:
                     self.settings[key] = baseName
 
-    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False):
+    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False, displacePH=False):
         if obj is None:
             return
         now = datetime.now()
@@ -145,6 +151,9 @@ class MHMat:
 
         if self.settings["transparencymapTexture"] or transpPH:
             self.nodehelper.createTransparencyTextureNode(self.settings["transparencymapTexture"])
+
+        if self.settings["displacementmapTexture"] or displacePH:
+            self.nodehelper.createDisplacementTextureNode(self.settings["displacementmapTexture"])
 
         if self.settings["diffuseColor"] is not None:
             col = self.settings["diffuseColor"]
