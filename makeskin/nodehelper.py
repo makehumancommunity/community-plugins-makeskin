@@ -58,7 +58,7 @@ class NodeHelper:
                     srcNode = link.from_node
         return srcNode
 
-    def _findNodeLinkedToPrincipled(self, principledSocketName):
+    def findNodeLinkedToPrincipled(self, principledSocketName):
         if not self._principledNode:
             return None
         for link in self._nodetree.links:
@@ -216,7 +216,7 @@ class NodeHelper:
     def findTransparencyTextureNode(self):
         if not self._principledNode:
             return None
-        dtn = self._findNodeLinkedToPrincipled("Transmission")
+        dtn = self.findNodeLinkedToPrincipled("Transmission")
         if not dtn:
             print("The principled node did not have anything linked to its Transmission input, so there is no transparency texture node")
             return None
@@ -234,7 +234,7 @@ class NodeHelper:
     def findDiffuseTextureNode(self):
         if not self._principledNode:
             return None
-        dtn = self._findNodeLinkedToPrincipled("Base Color")
+        dtn = self.findNodeLinkedToPrincipled("Base Color")
         if not dtn:
             print("The principled node did not have anything linked to its Base color input, so there is no diffuse texture node")
             return None
@@ -278,7 +278,7 @@ class NodeHelper:
     def findBumpMapNode(self):
         if not self._principledNode:
             return None
-        nn = self._findNodeLinkedToPrincipled("Normal")
+        nn = self.findNodeLinkedToPrincipled("Normal")
         if not nn:
             print("The principled node did not have anything linked to its Normal input, so there is no bumpmap texture node")
             return None
@@ -313,7 +313,7 @@ class NodeHelper:
     def findNormalMapNode(self):
         if not self._principledNode:
             return None
-        nn = self._findNodeLinkedToPrincipled("Normal")
+        nn = self.findNodeLinkedToPrincipled("Normal")
         if not nn:
             print("The principled node did not have anything linked to its Normal input, so there is no normalmap texture node")
             return None

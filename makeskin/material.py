@@ -111,6 +111,14 @@ class MHMat:
             sett["displacementmapTexture"] = str(dtp).strip()
             sett["displacementmapIntensity"] = nh.findDisplacementMapIntensity()
 
+        sett["emissiveColor"] = None
+        col = nh.getPrincipledSocketDefaultValue("Emission")
+        if col:
+            if col[0] < 0.01 and col[1] < 0.01 and col[2] < 0.01:
+                pass # emission is black
+            else:
+                sett["emissiveColor"] = [col[0], col[1], col[2]]
+
         r = 1.0 - nh.getPrincipledSocketDefaultValue('Roughness')
         sett["shininess"] = r
         sett["specularColor"] = [r, r, r]
@@ -164,6 +172,11 @@ class MHMat:
             col = self.settings["viewPortColor"]
             col.append(1.0)
             mat.diffuse_color = col
+
+        if self.settings["emissiveColor"] is not None:
+            col = self.settings["emissiveColor"]
+            col.append(1.0)
+            self.nodehelper.setPrincipledSocketDefaultValue("Emission", col)
 
         if self.settings["shininess"] is not None:
             self.nodehelper.setPrincipledSocketDefaultValue("Roughness", 1.0 - self.settings["shininess"])
