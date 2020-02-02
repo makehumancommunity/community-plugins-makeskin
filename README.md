@@ -51,9 +51,9 @@ several keys that are supported by MHMAT, but which makes no visible difference 
 | [transparencymapTexture](docs/transparencymapTexture.md)  | YES                     | YES                | -              | The image file used for transparency mapping. This maps onto the principled's "Transmission" socket, whereas the diffuseTexture alpha channel maps on the "Alpha". The transparency map is ignored in MakeHuman (whereas the alpha channel works) |
 | [aomapTexture](docs/aomapTexture.md)                      | -                       | -                  | ?              | The image file used for ambient occlusion mapping. This is not supported by node materials.            |
 | [blendMaterial](docs/blendMaterial.md)                    | YES                     | YES                | -              | A file name pointing at a .blend file with a complete blender material. This is supported by MakeSkin, but not actually a part of the MHMAT spec.            |
-| diffuseIntensity            | -                       | -                  | YES            | How much weight should be assigned to the diffuse texture (vs the diffuseColor key). Default is 1.0.            |
-| bumpmapIntensity            | YES                     | YES                | -              | How strong is the bump map? Default is 1.0           |
-| normalmapIntensity          | YES                     | YES                | YES            | How strong is the normal map? Default is 1.0            |
+| [diffuseIntensity](docs/diffuseIntensity.md)              | -                       | -                  | YES            | How much weight should be assigned to the diffuse texture (vs the diffuseColor key). Default is 1.0.            |
+| [bumpmapIntensity](docs/bumpmapIntensity.md)              | YES                     | YES                | -              | How strong is the bump map? Default is 1.0           |
+| [normalmapIntensity](docs/normalmapIntensity.md)          | YES                     | YES                | YES            | How strong is the normal map? Default is 1.0            |
 | displacementMapIntensity    | -                       | YES                | -              | How strong is the displacement map? Default is 1.0            |
 | specularmapIntensity        | -                       | -                  | ?              | How strong is the specular map? Default is 1.0            |
 | transparencymapIntensity    | -                       | YES                | ?              | How strong is the transparency map? Default is 1.0            |
