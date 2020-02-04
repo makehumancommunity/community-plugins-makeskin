@@ -143,7 +143,12 @@ class MHMat:
                     suffix = re.sub(r'map','',suffix)
                     baseName = matBase + '_' + suffix + texExt
                 destLoc = os.path.join(matLoc, baseName)
-                shutil.copyfile(origLoc, destLoc)
+                origLoc = os.path.abspath(origLoc)
+                destLoc = os.path.abspath(destLoc)
+                if origLoc != destLoc:
+                    shutil.copyfile(origLoc, destLoc)
+                else:
+                    print("Source and destination is same file, skipping texture copy for this entry")
                 if adjustSettings:
                     self.settings[key] = baseName
 
