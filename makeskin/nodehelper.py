@@ -8,7 +8,7 @@ import pprint, os
 
 _coords = dict()
 _coords["diffuseTexture"] = [-400.0, 300.0]
-_coords["transparencyTexture"] = [-800.0, 100.0]
+_coords["transparencyTexture"] = [-800.0, 200.0]
 _coords["normalMapTextureSolo"] = [-600.0, -300.0]
 _coords["normalMapSolo"] = [-250.0, -200.0]
 _coords["bumpMapTextureSolo"] = [-600.0, 300.0]
@@ -27,17 +27,29 @@ class NodeHelper:
         self._material = obj.data.materials[0]
         self._nodetree = self._material.node_tree
 
-        self._principledNode = None
+        self._principledNode = self.findFirstNodeByClass(ShaderNodeBsdfPrincipled)
         self._diffuseTextureNode = None
         self._normalmapTextureNode = None
         self._bumpmapTextureNode = None
-        self._outputNode = None
+        self._outputNode = self.findFirstNodeByType('OUTPUT_MATERIAL')
 
+    def findNodeByName(self, nodeName):
         for node in self._nodetree.nodes:
-            if isinstance(node, ShaderNodeBsdfPrincipled):
-                self._principledNode = node
-            if node.type == "OUTPUT_MATERIAL":
-                self._outputNode = node
+            if node.name == nodeName:
+                return node
+        return None
+
+    def findFirstNodeByType(self, typeName):
+        for node in self._nodetree.nodes:
+            if node.type == typeName:
+                return node
+        return None
+
+    def findFirstNodeByClass(self, typeClass):
+        for node in self._nodetree.nodes:
+            if isinstance(node, typeClass):
+                return node
+        return None
 
     def getPrincipledSocketDefaultValue(self, socketName):
         if not self._principledNode:
@@ -49,86 +61,66 @@ class NodeHelper:
             return
         self._principledNode.inputs[socketName].default_value = socketValue
 
-    def _findNodeLinkedTo(self, nodeTarget, socketTarget):
-        srcNode = None
+    def findNodeLinkedToSocket(self, nodeLinkedTo, nameOfSocket):
+        if not nodeLinkedTo:
+            return None
+        sourceSideOfLink = None
         for link in self._nodetree.links:
-            if link.to_node == nodeTarget:
-                tsock = link.to_socket
-                if tsock.name == socketTarget:
-                    srcNode = link.from_node
-        return srcNode
+            if link.to_node == nodeLinkedTo:
+                socketLinkedTo = link.to_socket
+                if socketLinkedTo.name == nameOfSocket:
+                    sourceSideOfLink = link.from_node
+        return sourceSideOfLink
 
     def findNodeLinkedToPrincipled(self, principledSocketName):
-        if not self._principledNode:
-            return None
-        for link in self._nodetree.links:
-            if link.to_node == self._principledNode:
-                tsock = link.to_socket
-                if tsock.name == principledSocketName:
-                    return link.from_node
+        return self.findNodeLinkedToSocket(self._principledNode, principledSocketName)
+
+    def _createImageTextureNode(self, imagePathAbsolute=None, coordinatesName=None):
+        global _coords
+        newTextureNode = self._nodetree.nodes.new("ShaderNodeTexImage")
+        if coordinatesName:
+            newTextureNode.location = _coords[coordinatesName]
+        if imagePathAbsolute:
+            imageFileName = os.path.basename(imagePathAbsolute)
+            if imageFileName in bpy.data.images:
+                print("image existed: " + imagePathAbsolute)
+                image = bpy.data.images[imageFileName]
+            else:
+                image = bpy.data.images.load(imagePathAbsolute)
+            image.colorspace_settings.name = "sRGB"
+            newTextureNode.image = image
+        return newTextureNode
 
     def createTransparencyTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
-        global _coords
-        dt = self._nodetree.nodes.new("ShaderNodeTexImage")
-        dt.location = _coords["transparencyTexture"]
-
-        if imagePathAbsolute:
-            fn = os.path.basename(imagePathAbsolute)
-            if fn in bpy.data.images:
-                print("image existed: " + imagePathAbsolute)
-                image = bpy.data.images[fn]
-            else:
-                image = bpy.data.images.load(imagePathAbsolute)
-            image.colorspace_settings.name = "sRGB"
-            dt.image = image
-
+        transparencyTextureNode = self._createImageTextureNode(imagePathAbsolute, "transparencyTexture")
         if linkToPrincipled and self._principledNode:
-            self._nodetree.links.new(dt.outputs["Color"], self._principledNode.inputs["Transmission"])
-        return dt
+            self._nodetree.links.new(transparencyTextureNode.outputs["Color"], self._principledNode.inputs["Transmission"])
+        transparencyTextureNode.name = "transparencymapTexture"
+        transparencyTextureNode.label = "Transparencymap Texture"
+        return transparencyTextureNode
 
     def createDisplacementTextureNode(self, imagePathAbsolute=None):
-
         global _coords
-        dis = self._nodetree.nodes.new("ShaderNodeDisplacement")
-        dis.location = _coords["displacement"]
-
-        dt = self._nodetree.nodes.new("ShaderNodeTexImage")
-        dt.location = _coords["displacementTexture"]
-
-        if imagePathAbsolute:
-            fn = os.path.basename(imagePathAbsolute)
-            if fn in bpy.data.images:
-                print("image existed: " + imagePathAbsolute)
-                image = bpy.data.images[fn]
-            else:
-                image = bpy.data.images.load(imagePathAbsolute)
-            image.colorspace_settings.name = "sRGB"
-            dt.image = image
-
-        self._nodetree.links.new(dis.outputs["Displacement"], self._outputNode.inputs["Displacement"])
-        self._nodetree.links.new(dt.outputs["Color"], dis.inputs["Height"])
-
-        return dt
+        displacementNode = self._nodetree.nodes.new("ShaderNodeDisplacement")
+        displacementNode.location = _coords["displacement"]
+        displacementTextureNode = self._createImageTextureNode(imagePathAbsolute, "displacementTexture")
+        displacementTextureNode.location = _coords["displacementTexture"]
+        self._nodetree.links.new(displacementNode.outputs["Displacement"], self._outputNode.inputs["Displacement"])
+        self._nodetree.links.new(displacementTextureNode.outputs["Color"], displacementNode.inputs["Height"])
+        displacementTextureNode.name = "displacementmapTexture"
+        displacementTextureNode.label = "Displacementmap Texture"
+        displacementNode.name = "displacementmap"
+        displacementNode.label = "Displacementmap"
+        return displacementTextureNode
 
     def createDiffuseTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
-        global _coords
-        dt = self._nodetree.nodes.new("ShaderNodeTexImage")
-        dt.location = _coords["diffuseTexture"]
-
-        if imagePathAbsolute:
-            fn = os.path.basename(imagePathAbsolute)
-            if fn in bpy.data.images:
-                print("image existed: " + imagePathAbsolute)
-                image = bpy.data.images[fn]
-            else:
-                image = bpy.data.images.load(imagePathAbsolute)
-            image.colorspace_settings.name = "sRGB"
-            dt.image = image
-
+        diffuseTextureNode = self._createImageTextureNode(imagePathAbsolute, "diffuseTexture")
         if linkToPrincipled and self._principledNode:
-            self._nodetree.links.new(dt.outputs["Color"], self._principledNode.inputs["Base Color"])
-            self._nodetree.links.new(dt.outputs["Alpha"], self._principledNode.inputs["Alpha"])
-        return dt
+            self._nodetree.links.new(diffuseTextureNode.outputs["Color"], self._principledNode.inputs["Base Color"])
+            self._nodetree.links.new(diffuseTextureNode.outputs["Alpha"], self._principledNode.inputs["Alpha"])
+        diffuseTextureNode.name = "diffuseTexture"
+        diffuseTextureNode.label = "Diffuse Texture"
+        return diffuseTextureNode
 
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
@@ -146,51 +138,39 @@ class NodeHelper:
             self._nodetree.links.new(nm.outputs["Normal"], bm.inputs["Normal"])
             self._nodetree.links.new(nmt.outputs["Color"], nm.inputs["Color"])
 
-    def _createBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
-        bmt = self._nodetree.nodes.new("ShaderNodeTexImage")
-
-        if bumpImagePathAbsolute:
-            fn = os.path.basename(bumpImagePathAbsolute)
-            if fn in bpy.data.images:
-                print("image existed: " + bumpImagePathAbsolute)
-                image = bpy.data.images[fn]
-            else:
-                image = bpy.data.images.load(bumpImagePathAbsolute)
-            image.colorspace_settings.name = "Non-Color"
-            bmt.image = image
-
-        bm = self._nodetree.nodes.new("ShaderNodeBump")
-
-        if linkToPrincipled and self._principledNode:
-            self._nodetree.links.new(bm.outputs["Normal"], self._principledNode.inputs["Normal"])
-            self._nodetree.links.new(bmt.outputs["Color"], bm.inputs["Height"])
-        return (bmt, bm)
-
     def createOnlyBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
         (bmt, bm) = self._createBump(bumpImagePathAbsolute=bumpImagePathAbsolute, linkToPrincipled=linkToPrincipled)
         bmt.location = _coords["bumpMapTextureSolo"]
         bm.location = _coords["bumpMapSolo"]
 
-    def _createNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
-        nmt = self._nodetree.nodes.new("ShaderNodeTexImage")
-
-        if normalImagePathAbsolute:
-            fn = os.path.basename(normalImagePathAbsolute)
-            if fn in bpy.data.images:
-                print("image existed: " + normalImagePathAbsolute)
-                image = bpy.data.images[fn]
-            else:
-                image = bpy.data.images.load(normalImagePathAbsolute)
-            image.colorspace_settings.name = "Non-Color"
-            nmt.image = image
-
-        nm = self._nodetree.nodes.new("ShaderNodeNormalMap")
-
+    def _createBump(self, bumpImagePathAbsolute=None, linkToPrincipled=True):
+        bumpmapTextureNode = self._createImageTextureNode(bumpImagePathAbsolute)
+        if bumpImagePathAbsolute:
+            bumpmapTextureNode.image.colorspace_settings.name = "Non-Color"
+        bumpmapNode = self._nodetree.nodes.new("ShaderNodeBump")
         if linkToPrincipled and self._principledNode:
-            self._nodetree.links.new(nm.outputs["Normal"], self._principledNode.inputs["Normal"])
-            self._nodetree.links.new(nmt.outputs["Color"], nm.inputs["Color"])
-        return (nmt, nm)
+            self._nodetree.links.new(bumpmapNode.outputs["Normal"], self._principledNode.inputs["Normal"])
+            self._nodetree.links.new(bumpmapTextureNode.outputs["Color"], bumpmapNode.inputs["Height"])
+        bumpmapTextureNode.name = "bumpmapTexture"
+        bumpmapTextureNode.label = "Bumpmap Texture"
+        bumpmapNode.name = "bumpmap"
+        bumpmapNode.label = "Bumpmap"
+        return (bumpmapTextureNode, bumpmapNode)
+
+    def _createNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
+        normalmapTextureNode = self._createImageTextureNode(normalImagePathAbsolute)
+        if normalImagePathAbsolute:
+            normalmapTextureNode.image.colorspace_settings.name = "Non-Color"
+        normalmapNode = self._nodetree.nodes.new("ShaderNodeNormalMap")
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(normalmapNode.outputs["Normal"], self._principledNode.inputs["Normal"])
+            self._nodetree.links.new(normalmapTextureNode.outputs["Color"], normalmapNode.inputs["Color"])
+        normalmapTextureNode.name = "normalmapTexture"
+        normalmapTextureNode.label = "Normalmap Texture"
+        normalmapNode.name = "normalmap"
+        normalmapNode.label = "Normalmap"
+        return (normalmapTextureNode, normalmapNode)
 
     def createOnlyNormal(self, normalImagePathAbsolute=None, linkToPrincipled=True):
         (nmt, nm) = self._createNormal(normalImagePathAbsolute=normalImagePathAbsolute, linkToPrincipled=linkToPrincipled)
@@ -213,132 +193,63 @@ class NodeHelper:
             print("Found an image texture, but its image property was empty.")
         return None
 
+    def _findTexureFileName(self, nodeName):
+        node = self.findNodeByName(nodeName)
+        return self._extractImageFilePath(node)
+
     def findTransparencyTextureNode(self):
-        if not self._principledNode:
-            return None
-        dtn = self.findNodeLinkedToPrincipled("Transmission")
-        if not dtn:
-            print("The principled node did not have anything linked to its Transmission input, so there is no transparency texture node")
-            return None
-        if not isinstance(dtn, ShaderNodeTexImage):
-            print("The principled node had a link to its Transmission input, but the source was not an image texture. Giving up on finding a transparency texture node.")
-            return None
-        return dtn
+        return self.findNodeByName("transparencymapTexture")
 
     def findTransparencyTextureFilePath(self):
-        if not self._principledNode:
-            return None
-        fnode = self.findTransparencyTextureNode()
-        return self._extractImageFilePath(fnode)
+        return self._findTexureFileName("transparencymapTexture")
 
     def findDiffuseTextureNode(self):
-        if not self._principledNode:
-            return None
-        dtn = self.findNodeLinkedToPrincipled("Base Color")
-        if not dtn:
-            print("The principled node did not have anything linked to its Base color input, so there is no diffuse texture node")
-            return None
-        if not isinstance(dtn, ShaderNodeTexImage):
-            print("The principled node had a link to its Base Color input, but the source was not an image texture. Giving up on finding a diffuse texture node.")
-            return None
-        return dtn
+        return self.findNodeByName("diffuseTexture")
 
     def findDiffuseTextureFilePath(self):
-        if not self._principledNode:
-            return None
-        fnode = self.findDiffuseTextureNode()
-        return self._extractImageFilePath(fnode)
+        return self._findTexureFileName("diffuseTexture")
 
     def findDisplacementNode(self):
-        if not self._outputNode:
-            return None
-        for link in self._nodetree.links:
-            if link.to_node == self._outputNode:
-                tsock = link.to_socket
-                if tsock.name == "Displacement":
-                    return link.from_node
-        return None
+        return self.findNodeByName("displacementmap")
 
     def findDisplacementTextureNode(self):
-        dn = self.findDisplacementNode()
-        if not dn:
-            return None
-
-        for link in self._nodetree.links:
-            if link.to_node == dn:
-                tsock = link.to_socket
-                if tsock.name == "Height":
-                    return link.from_node
-        return None
+        return self.findNodeByName("displacementmapTexture")
 
     def findDisplacementTextureFilePath(self):
-        fnode = self.findDisplacementTextureNode()
-        return self._extractImageFilePath(fnode)
+        return self._findTexureFileName("displacementmapTexture")
 
     def findBumpMapNode(self):
-        if not self._principledNode:
-            return None
-        nn = self.findNodeLinkedToPrincipled("Normal")
-        if not nn:
-            print("The principled node did not have anything linked to its Normal input, so there is no bumpmap texture node")
-            return None
-        if isinstance(nn, ShaderNodeBump):
-            return nn
-        return None
+        return self.findNodeByName("bumpmap")
 
     def findBumpMapTextureNode(self):
-        nn = self.findBumpMapNode()
-        if not nn:
-            return None
-        return self._findNodeLinkedTo(nn, "Height")
+        return self.findNodeByName("bumpmapTexture")
 
     def findBumpMapIntensity(self):
-        nn = self.findBumpMapNode()
-        if not nn:
+        bumpmapNode = self.findBumpMapNode()
+        if not bumpmapNode:
             return None
-        return nn.inputs['Strength'].default_value
+        return bumpmapNode.inputs['Strength'].default_value
 
     def findDisplacementMapIntensity(self):
-        nn = self.findDisplacementNode()
-        if not nn:
+        displacementmapNode = self.findDisplacementNode()
+        if not displacementmapNode:
             return None
-        return nn.inputs['Scale'].default_value
+        return displacementmapNode.inputs['Scale'].default_value
 
     def findBumpMapTextureFilePath(self):
-        if not self._principledNode:
-            return None
-        fnode = self.findBumpMapTextureNode()
-        return self._extractImageFilePath(fnode)
+        return self._findTexureFileName("bumpmapTexture")
 
     def findNormalMapNode(self):
-        if not self._principledNode:
-            return None
-        nn = self.findNodeLinkedToPrincipled("Normal")
-        if not nn:
-            print("The principled node did not have anything linked to its Normal input, so there is no normalmap texture node")
-            return None
-        if isinstance(nn, ShaderNodeBump):
-            nn = self._findNodeLinkedTo(nn, "Normal")
-            if not nn:
-                return None
-        if isinstance(nn, ShaderNodeNormalMap):
-            return nn
-        return None
+        return self.findNodeByName("normalmap")
 
     def findNormalMapTextureNode(self):
-        nn = self.findNormalMapNode()
-        if not nn:
-            return None
-        return self._findNodeLinkedTo(nn, "Color")
+        return self.findNodeByName("normalmapTexture")
 
     def findNormalMapIntensity(self):
-        nn = self.findNormalMapNode()
-        if not nn:
+        normalmapNode = self.findNormalMapNode()
+        if not normalmapNode:
             return None
-        return nn.inputs['Strength'].default_value
+        return normalmapNode.inputs['Strength'].default_value
 
     def findNormalMapTextureFilePath(self):
-        if not self._principledNode:
-            return None
-        fnode = self.findNormalMapTextureNode()
-        return self._extractImageFilePath(fnode)
+        return self._findTexureFileName("normalmapTexture")
