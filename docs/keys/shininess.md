@@ -4,7 +4,7 @@
 * __What is it for:__ specifying the roughness of a material
 * __Use when:__ you want a specific roughness
 * __Implemented in MakeSkin:__ yes
-* __Makes visible difference in blender:__ yes (but see also [roughness](roughness.md)
+* __Makes visible difference in blender:__ yes (but see also [roughness](roughness.md))
 * __Makes visible difference in makehuman:__ yes
 
 The traditional MHMAT setting closest to roughness is shininess. However, the meaning of 

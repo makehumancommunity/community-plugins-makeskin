@@ -1,7 +1,9 @@
 # MakeSkin
 
 MakeSkin is a tool for working with MakeHuman materials. It is intended for uses where more advanced settings are needed,
-as opposed to (for example) the rather primitive materials written by MakeClothes. 
+as opposed to (for example) the rather primitive materials written by MakeClothes. MakeSkin can be used by the
+Makehuman Plugin For Blender to get support for the full material model, although this feature is currently experimental
+and only exists in a feature branch of MPFB.
 
 It is also intended to cater for production of skin materials, something which was never supported by MakeClothes. 
 
@@ -10,13 +12,16 @@ blender node setups. However, at this point, there are areas which do not map. S
  
 ## Current status
 
-This tool is as of yet pre-alpha and is not really usable for any real-world scenario. You will only want to download 
-this if you intend to participate in the development.
+The tool works mostly as intended, although parts of the MHMAT model is yet unimplemented. You should be able to use
+it to produce more competent materials for MakeHuman. 
+
+Note though that the asset repos do not yet support all texture files. It will thus be difficult to share materials
+using all features. Work is in progress to remedy this.  
  
 ## Installation and usage
 
-Right now there is no build available. In order to use with Blender, you'll have to clone the source and either link or 
-copy the "makeskin" directory to Blender's "addons" directory.
+A zip with the plugin is available from [the plugins page](http://www.makehumancommunity.org/content/plugins.html)
+at the community homepage. This can be installed as an addon in Blender. 
 
 ## Compatibility matrix
 
@@ -28,6 +33,12 @@ difference in MakeHuman, under the right conditions (not all shaders in MH suppo
 
 It should be especially noted that the MHMAT model is wider than what is actually implemented in MakeHuman, so there are 
 several keys that are supported by MHMAT, but which makes no visible difference at all in MakeHuman.
+
+On the opposite end it should be noted that a few keys have been added to make the handling in blender more smooth. These
+keys are outside the MHMAT spec and will not make a visible difference in MakeHuman. They will, however, survive the roundtrip
+to blender: If you use makeskin (or MPFB with makeskin enabled) when importing, you will get the settings set in blender.
+
+For more details, see the respective key's documentation.
 
 | MHMAT key                                                           | Implemented in MakeSkin | Visible in Blender | Visible in MH  | Description |  
 | :------------------------------------------------------------------ | :---------------------: | :----------------: | :------------: | :---------- |
