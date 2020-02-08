@@ -312,6 +312,19 @@ class MHMat:
         self.shaderConfig["diffuse"] = True
 
     def _parseFile(self, fileName):
+
+        # Build a hash for mapping lowercase keys to keys with correct case
+        keyCaseMap = dict()
+        for keyCorrectCase in self._keyList:
+            keyLowerCase = keyCorrectCase.lower()
+            keyCaseMap[keyLowerCase] = keyCorrectCase
+        for keyCorrectCase in self.shaderConfig.keys():
+            keyLowerCase = keyCorrectCase.lower()
+            keyCaseMap[keyLowerCase] = keyCorrectCase
+        keyCaseMap["shader"] = "shader"
+        keyCaseMap["shaderparam"] = "shaderParam"
+        keyCaseMap["shaderconfig"] = "shaderConfig"
+
         full = os.path.abspath(fileName)
         location = os.path.dirname(full)
         with open(fileName, 'r') as f:
@@ -322,6 +335,17 @@ class MHMat:
                     match = re.search(r'^([a-zA-Z]+)\s+(.*)$', parsedLine)
                     if match:
                         key = match.group(1)
+
+                        # Fix possibly incorrect case
+                        keyLower = key.lower()
+                        if keyLower in keyCaseMap:
+                            keyCorrectCase = keyCaseMap[key.lower()]
+                            if key != keyCorrectCase and (keyCorrectCase in self._keyList or keyCorrectCase in self.shaderConfig.keys()):
+                                print("Autofixing case: " + key + " -> " + keyCorrectCase)
+                                key = keyCorrectCase
+                        else:
+                            print("Not a valid key: " + key)
+
                         value = match.group(2)
                         if key in self._colorKeys:
                             self.settings[key] = []
