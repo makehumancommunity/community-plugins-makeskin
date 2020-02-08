@@ -128,9 +128,14 @@ class MHMat:
             else:
                 sett["emissiveColor"] = [col[0], col[1], col[2]]
 
-        r = 1.0 - nh.getPrincipledSocketDefaultValue('Roughness')
+        roughness = nh.getPrincipledSocketDefaultValue('Roughness')
+        r = 1.0 - roughness
         sett["shininess"] = r
         sett["specularColor"] = [r, r, r]
+        sett["roughness"] = roughness
+
+        sett["metallic"] = nh.getPrincipledSocketDefaultValue('Metallic')
+        sett["ior"] = nh.getPrincipledSocketDefaultValue('IOR')
 
 
     def copyTextures(self, mhmatFilenameAbsolute, normalize=True, adjustSettings=True):
@@ -201,6 +206,15 @@ class MHMat:
         if self.settings["shininess"] is not None:
             self.nodehelper.setPrincipledSocketDefaultValue("Roughness", 1.0 - self.settings["shininess"])
 
+        if self.settings["roughness"] is not None:
+            self.nodehelper.setPrincipledSocketDefaultValue("Roughness", self.settings["roughness"])
+
+        if self.settings["metallic"] is not None:
+            self.nodehelper.setPrincipledSocketDefaultValue("Metallic", self.settings["metallic"])
+
+        if self.settings["ior"] is not None:
+            self.nodehelper.setPrincipledSocketDefaultValue("IOR", self.settings["ior"])
+
         bump = bumpPH
         if self.settings["bumpmapTexture"]:
             bump = True
@@ -264,6 +278,9 @@ class MHMat:
             "sssBScale"]
 
         self._variousKeys = [
+            "metallic",
+            "ior",
+            "roughness",
             "shininess",
             "opacity",
             "translucency",
@@ -290,6 +307,9 @@ class MHMat:
         ]
 
         self._floatKeys = [
+            "roughness",
+            "metallic",
+            "ior",
             "shininess",
             "opacity",
             "translucency",

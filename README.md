@@ -62,7 +62,10 @@ several keys that are supported by MHMAT, but which makes no visible difference 
 | sssRScale                   | -                       | YES                | ?              | Scale of red SSS channel            |
 | sssGScale                   | -                       | YES                | ?              | Scale of green SSS channel            |
 | sssBScale                   | -                       | YES                | ?              | Scale of blue SSS channel            |
-| shininess                   | PARTIAL                 | YES                | YES            | How shiny is the material. This has been implemented in reverse as roughness in blender.            |
+| [shininess](docs/keys/shininess.md)                                  | YES                     | YES                | YES            | How shiny is the material. This has been implemented in reverse as roughness in blender.            |
+| [roughness](docs/keys/roughness.md)                                  | YES                     | YES                | -              | This is an alias of shininess, specifically for blender            |
+| [metallic](docs/keys/metallic.md)                                    | YES                     | YES                | -              | If the material is to be considered metallic            |
+| [ior](docs/keys/ior.md)                                              | YES                     | YES                | -              | Index of refraction            |
 | opacity                     | -                       | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |
 | translucency                | -                       | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |
 | shadeless                   | YES                     | -                  | ?              | (It'll have to be further investigated what this does, if anything)            |
