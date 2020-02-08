@@ -15,6 +15,8 @@ a subset of cases, it will be necessary to do actual displacement.
 
 In practise, the displacementmap looks and works exactly as a bumpmap: White is up and black is down. 
 
+Note that combining real displacement with normal or bump maps might produce strange side effects in blender. 
+
 ## Example
 
     displacementmapTexture mycharacter_displace.png
