@@ -111,6 +111,15 @@ class MHMat:
             sett["displacementmapTexture"] = str(dtp).strip()
             sett["displacementmapIntensity"] = nh.findDisplacementMapIntensity()
 
+        diffuseColor = nh.getPrincipledSocketDefaultValue('Base Color')
+
+        diffuseIntensity = nh.findNodeByName('diffuseIntensity')
+        if diffuseIntensity:
+            sett["diffuseIntensity"] = diffuseIntensity.inputs['Fac'].default_value
+            diffuseColor = diffuseIntensity.inputs['Color1'].default_value
+
+        sett["diffuseColor"] = [diffuseColor[0], diffuseColor[1], diffuseColor[2]]
+
         sett["emissiveColor"] = None
         col = nh.getPrincipledSocketDefaultValue("Emission")
         if col:
@@ -123,8 +132,6 @@ class MHMat:
         sett["shininess"] = r
         sett["specularColor"] = [r, r, r]
 
-        d = nh.getPrincipledSocketDefaultValue('Base Color')
-        sett["diffuseColor"] = [d[0], d[1], d[2]]
 
     def copyTextures(self, mhmatFilenameAbsolute, normalize=True, adjustSettings=True):
         matBaseName = os.path.basename(mhmatFilenameAbsolute)
@@ -172,6 +179,14 @@ class MHMat:
             col = self.settings["diffuseColor"]
             col.append(1.0)
             self.nodehelper.setPrincipledSocketDefaultValue("Base Color", col)
+            diffuseIntensity = self.nodehelper.findNodeByName("diffuseIntensity")
+            if diffuseIntensity:
+                diffuseIntensity.inputs['Color1'].default_value = col
+
+        if self.settings["diffuseIntensity"] is not None:
+            diffuseIntensity = self.nodehelper.findNodeByName("diffuseIntensity")
+            if diffuseIntensity:
+                diffuseIntensity.inputs['Fac'].default_value = self.settings["diffuseIntensity"]
 
         if self.settings["viewPortColor"] is not None:
             col = self.settings["viewPortColor"]
@@ -400,7 +415,8 @@ class MHMat:
 
         for key in self._intensityKeys:
             if key in self.settings and not self.settings[key] is None:
-                mat = mat + key + " " + str(self.settings[key]) + "\n"
+                if key != "diffuseIntensity" or self.settings[key] < 0.9999:
+                    mat = mat + key + " " + str(self.settings[key]) + "\n"
 
         mat = mat + "\n"
         mat = mat + "// SSS\n\n"

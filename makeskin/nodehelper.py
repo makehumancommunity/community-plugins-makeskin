@@ -3,11 +3,12 @@
 
 import bpy
 import bpy.types
-from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump, ShaderNodeNormalMap, ShaderNodeDisplacement
+from bpy.types import ShaderNodeBsdfPrincipled, ShaderNodeTexImage, ShaderNodeNormalMap, ShaderNodeBump, ShaderNodeNormalMap, ShaderNodeDisplacement, ShaderNodeMixRGB
 import pprint, os
 
 _coords = dict()
-_coords["diffuseTexture"] = [-400.0, 300.0]
+_coords["diffuseTexture"] = [-500.0, 300.0]
+_coords["diffuseIntensity"] = [-200, 400]
 _coords["transparencyTexture"] = [-800.0, 200.0]
 _coords["normalMapTextureSolo"] = [-600.0, -300.0]
 _coords["normalMapSolo"] = [-250.0, -200.0]
@@ -125,15 +126,6 @@ class NodeHelper:
         displacementNode.label = "Displacementmap"
         return displacementTextureNode
 
-    def createDiffuseTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
-        diffuseTextureNode = self._createImageTextureNode(imagePathAbsolute, "diffuseTexture")
-        if linkToPrincipled and self._principledNode:
-            self._nodetree.links.new(diffuseTextureNode.outputs["Color"], self._principledNode.inputs["Base Color"])
-            self._nodetree.links.new(diffuseTextureNode.outputs["Alpha"], self._principledNode.inputs["Alpha"])
-        diffuseTextureNode.name = "diffuseTexture"
-        diffuseTextureNode.label = "Diffuse Texture"
-        return diffuseTextureNode
-
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
         (nmt, nm) = self._createNormal(normalImagePathAbsolute=normalImagePathAbsolute, linkToPrincipled=False)
@@ -213,6 +205,26 @@ class NodeHelper:
         return self._extractImageFilePath(node)
 
     ##### DIFFUSE #####
+
+    def createDiffuseTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
+        global _coords
+        diffuseTextureNode = self._createImageTextureNode(imagePathAbsolute, "diffuseTexture")
+        diffuseTextureNode.name = "diffuseTexture"
+        diffuseTextureNode.label = "Diffuse Texture"
+
+        diffuseIntensityNode = self._nodetree.nodes.new("ShaderNodeMixRGB")
+        diffuseIntensityNode.name = "diffuseIntensity"
+        diffuseIntensityNode.label = "diffuse intensity"
+        diffuseIntensityNode.location = _coords["diffuseIntensity"]
+        diffuseIntensityNode.inputs['Fac'].default_value = 1.0
+        diffuseIntensityNode.inputs['Color1'].default_value = [1.0, 1.0, 1.0, 1.0]
+
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(diffuseTextureNode.outputs["Color"], diffuseIntensityNode.inputs['Color2'])
+            self._nodetree.links.new(diffuseIntensityNode.outputs["Color"], self._principledNode.inputs['Base Color'])
+            self._nodetree.links.new(diffuseTextureNode.outputs["Alpha"], self._principledNode.inputs["Alpha"])
+
+        return diffuseTextureNode
 
     def findDiffuseTextureNode(self):
         return self.findNodeByName("diffuseTexture")
