@@ -51,6 +51,18 @@ class NodeHelper:
                 return node
         return None
 
+    def findNodeSocketDefaultValue(self, nodeName, socketName):
+        node = self.findNodeByName(nodeName)
+        if not node:
+            return None
+        if not node.inputs:
+            print("Node of type " + str(type(node)) + " didn't have any inputs!?")
+            return None
+        if not socketName in node.inputs:
+            print("Node of type " + str(type(node)) + " didn't have any input called " + socketName)
+            return None
+        return node.inputs[socketName].default_value
+
     def getPrincipledSocketDefaultValue(self, socketName):
         if not self._principledNode:
             return None
@@ -180,6 +192,7 @@ class NodeHelper:
 
     def _extractImageFilePath(self, textureNode):
         if not textureNode:
+            print("WARNING: trying to find texture for None node")
             return None
         if textureNode.image:
             if textureNode.image.filepath or textureNode.image.filepath_raw:
@@ -195,7 +208,19 @@ class NodeHelper:
 
     def _findTexureFileName(self, nodeName):
         node = self.findNodeByName(nodeName)
+        if not node:
+            return None
         return self._extractImageFilePath(node)
+
+    ##### DIFFUSE #####
+
+    def findDiffuseTextureNode(self):
+        return self.findNodeByName("diffuseTexture")
+
+    def findDiffuseTextureFilePath(self):
+        return self._findTexureFileName("diffuseTexture")
+
+    ##### TRANSPARENCY #####
 
     def findTransparencyTextureNode(self):
         return self.findNodeByName("transparencymapTexture")
@@ -203,11 +228,35 @@ class NodeHelper:
     def findTransparencyTextureFilePath(self):
         return self._findTexureFileName("transparencymapTexture")
 
-    def findDiffuseTextureNode(self):
-        return self.findNodeByName("diffuseTexture")
+    ##### BUMP #####
 
-    def findDiffuseTextureFilePath(self):
-        return self._findTexureFileName("diffuseTexture")
+    def findBumpMapNode(self):
+        return self.findNodeByName("bumpmap")
+
+    def findBumpMapTextureNode(self):
+        return self.findNodeByName("bumpmapTexture")
+
+    def findBumpMapIntensity(self):
+        return self.findNodeSocketDefaultValue("bumpmap", "Strength")
+
+    def findBumpMapTextureFilePath(self):
+        return self._findTexureFileName("bumpmapTexture")
+
+    ##### NORMAL #####
+
+    def findNormalMapNode(self):
+        return self.findNodeByName("normalmap")
+
+    def findNormalMapTextureNode(self):
+        return self.findNodeByName("normalmapTexture")
+
+    def findNormalMapIntensity(self):
+        return self.findNodeSocketDefaultValue("normalmap", "Strength")
+
+    def findNormalMapTextureFilePath(self):
+        return self._findTexureFileName("normalmapTexture")
+
+    ##### DISPLACEMENT #####
 
     def findDisplacementNode(self):
         return self.findNodeByName("displacementmap")
@@ -218,38 +267,9 @@ class NodeHelper:
     def findDisplacementTextureFilePath(self):
         return self._findTexureFileName("displacementmapTexture")
 
-    def findBumpMapNode(self):
-        return self.findNodeByName("bumpmap")
-
-    def findBumpMapTextureNode(self):
-        return self.findNodeByName("bumpmapTexture")
-
-    def findBumpMapIntensity(self):
-        bumpmapNode = self.findBumpMapNode()
-        if not bumpmapNode:
-            return None
-        return bumpmapNode.inputs['Strength'].default_value
-
     def findDisplacementMapIntensity(self):
-        displacementmapNode = self.findDisplacementNode()
-        if not displacementmapNode:
-            return None
-        return displacementmapNode.inputs['Scale'].default_value
+        return self.findNodeSocketDefaultValue("displacementmap", "Scale")
 
-    def findBumpMapTextureFilePath(self):
-        return self._findTexureFileName("bumpmapTexture")
 
-    def findNormalMapNode(self):
-        return self.findNodeByName("normalmap")
 
-    def findNormalMapTextureNode(self):
-        return self.findNodeByName("normalmapTexture")
 
-    def findNormalMapIntensity(self):
-        normalmapNode = self.findNormalMapNode()
-        if not normalmapNode:
-            return None
-        return normalmapNode.inputs['Strength'].default_value
-
-    def findNormalMapTextureFilePath(self):
-        return self._findTexureFileName("normalmapTexture")
