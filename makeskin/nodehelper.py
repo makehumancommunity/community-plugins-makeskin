@@ -20,6 +20,8 @@ _coords["bumpMapTextureDuo"] = [-600.0, -50.0]
 _coords["bumpMapDuo"] = [-250.0, -150.0]
 _coords["displacement"] = [-0.0, -350.0]
 _coords["displacementTexture"] = [-300.0, -550.0]
+_coords["roughnessTexture"] = [-1000.0, -100.0]
+_coords["metallicTexture"] = [-1000.0, 450.0]
 
 class NodeHelper:
 
@@ -88,7 +90,7 @@ class NodeHelper:
     def findNodeLinkedToPrincipled(self, principledSocketName):
         return self.findNodeLinkedToSocket(self._principledNode, principledSocketName)
 
-    def _createImageTextureNode(self, imagePathAbsolute=None, coordinatesName=None):
+    def _createImageTextureNode(self, imagePathAbsolute=None, coordinatesName=None, colorspace="sRGB"):
         global _coords
         newTextureNode = self._nodetree.nodes.new("ShaderNodeTexImage")
         if coordinatesName:
@@ -100,31 +102,10 @@ class NodeHelper:
                 image = bpy.data.images[imageFileName]
             else:
                 image = bpy.data.images.load(imagePathAbsolute)
-            image.colorspace_settings.name = "sRGB"
+            image.colorspace_settings.name = colorspace
             newTextureNode.image = image
         return newTextureNode
-
-    def createTransparencyTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
-        transparencyTextureNode = self._createImageTextureNode(imagePathAbsolute, "transparencyTexture")
-        if linkToPrincipled and self._principledNode:
-            self._nodetree.links.new(transparencyTextureNode.outputs["Color"], self._principledNode.inputs["Transmission"])
-        transparencyTextureNode.name = "transparencymapTexture"
-        transparencyTextureNode.label = "Transparencymap Texture"
-        return transparencyTextureNode
-
-    def createDisplacementTextureNode(self, imagePathAbsolute=None):
-        global _coords
-        displacementNode = self._nodetree.nodes.new("ShaderNodeDisplacement")
-        displacementNode.location = _coords["displacement"]
-        displacementTextureNode = self._createImageTextureNode(imagePathAbsolute, "displacementTexture")
-        displacementTextureNode.location = _coords["displacementTexture"]
-        self._nodetree.links.new(displacementNode.outputs["Displacement"], self._outputNode.inputs["Displacement"])
-        self._nodetree.links.new(displacementTextureNode.outputs["Color"], displacementNode.inputs["Height"])
-        displacementTextureNode.name = "displacementmapTexture"
-        displacementTextureNode.label = "Displacementmap Texture"
-        displacementNode.name = "displacementmap"
-        displacementNode.label = "Displacementmap"
-        return displacementTextureNode
+    
 
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
@@ -234,11 +215,51 @@ class NodeHelper:
 
     ##### TRANSPARENCY #####
 
+    def createTransparencyTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
+        transparencyTextureNode = self._createImageTextureNode(imagePathAbsolute, "transparencyTexture", colorspace="Non-Color")
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(transparencyTextureNode.outputs["Color"], self._principledNode.inputs["Transmission"])
+        transparencyTextureNode.name = "transparencymapTexture"
+        transparencyTextureNode.label = "Transparencymap Texture"
+        return transparencyTextureNode
+
     def findTransparencyTextureNode(self):
         return self.findNodeByName("transparencymapTexture")
 
     def findTransparencyTextureFilePath(self):
         return self._findTexureFileName("transparencymapTexture")
+
+    ##### ROUGHNESS #####
+
+    def createRoughnessTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
+        roughnessTextureNode = self._createImageTextureNode(imagePathAbsolute, "roughnessTexture", colorspace="Non-Color")
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(roughnessTextureNode.outputs["Color"], self._principledNode.inputs["Roughness"])
+        roughnessTextureNode.name = "roughnessmapTexture"
+        roughnessTextureNode.label = "Roughnessmap Texture"
+        return roughnessTextureNode
+
+    def findRoughnessTextureNode(self):
+        return self.findNodeByName("roughnessmapTexture")
+
+    def findRoughnessTextureFilePath(self):
+        return self._findTexureFileName("roughnessmapTexture")
+
+    ##### METALLIC #####
+
+    def createMetallicTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
+        metallicTextureNode = self._createImageTextureNode(imagePathAbsolute, "metallicTexture", colorspace="Non-Color")
+        if linkToPrincipled and self._principledNode:
+            self._nodetree.links.new(metallicTextureNode.outputs["Color"], self._principledNode.inputs["Metallic"])
+        metallicTextureNode.name = "metallicmapTexture"
+        metallicTextureNode.label = "Metallicmap Texture"
+        return metallicTextureNode
+
+    def findMetallicTextureNode(self):
+        return self.findNodeByName("metallicmapTexture")
+
+    def findMetallicTextureFilePath(self):
+        return self._findTexureFileName("metallicmapTexture")
 
     ##### BUMP #####
 
@@ -270,6 +291,20 @@ class NodeHelper:
 
     ##### DISPLACEMENT #####
 
+    def createDisplacementTextureNode(self, imagePathAbsolute=None):
+        global _coords
+        displacementNode = self._nodetree.nodes.new("ShaderNodeDisplacement")
+        displacementNode.location = _coords["displacement"]
+        displacementTextureNode = self._createImageTextureNode(imagePathAbsolute, "displacementTexture")
+        displacementTextureNode.location = _coords["displacementTexture"]
+        self._nodetree.links.new(displacementNode.outputs["Displacement"], self._outputNode.inputs["Displacement"])
+        self._nodetree.links.new(displacementTextureNode.outputs["Color"], displacementNode.inputs["Height"])
+        displacementTextureNode.name = "displacementmapTexture"
+        displacementTextureNode.label = "Displacementmap Texture"
+        displacementNode.name = "displacementmap"
+        displacementNode.label = "Displacementmap"
+        return displacementTextureNode
+    
     def findDisplacementNode(self):
         return self.findNodeByName("displacementmap")
 

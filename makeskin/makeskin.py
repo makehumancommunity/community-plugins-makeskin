@@ -24,6 +24,8 @@ class MHS_PT_MakeSkinPanel(bpy.types.Panel):
             createBox.prop(scn, 'MhMsCreateNormal', text="Normal map")
             createBox.prop(scn, 'MhMsCreateBump', text="Bump map")
             createBox.prop(scn, 'MhMsCreateTransp', text="Transparency map")
+            createBox.prop(scn, 'MhMsCreateRough', text="Roughness map")
+            createBox.prop(scn, 'MhMsCreateMetallic', text="Metallic map")
             createBox.prop(scn, 'MhMsCreateDisp', text="Displacement map")
             createBox.prop(scn, 'MhMsOverwrite1', text="Overwrite existing")
             createBox.operator("makeskin.create_material", text="Create material")

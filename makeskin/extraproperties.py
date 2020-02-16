@@ -43,6 +43,8 @@ def extraProperties():
     bpy.types.Scene.MhMsCreateNormal = BoolProperty(name="Create normal map placeholder", description="Create a placeholder for a normal map", default=False)
     bpy.types.Scene.MhMsCreateBump = BoolProperty(name="Create bump map placeholder", description="Create a placeholder for a bump map", default=False)
     bpy.types.Scene.MhMsCreateTransp = BoolProperty(name="Create transparency map placeholder", description="Create a placeholder for a transparency map", default=False)
+    bpy.types.Scene.MhMsCreateMetallic = BoolProperty(name="Create metallic map placeholder", description="Create a placeholder for a metallic map", default=False)
+    bpy.types.Scene.MhMsCreateRough = BoolProperty(name="Create roughness map placeholder", description="Create a placeholder for a roughness map", default=False)
     bpy.types.Scene.MhMsCreateDisp = BoolProperty(name="Create displacement map placeholder", description="Create a placeholder for a displacement map", default=False)
 
     bpy.types.Scene.MhMsOverwrite1 = BoolProperty(name="Overwrite existing (create)", description="Overwrite existing material(s) on object", default=False)

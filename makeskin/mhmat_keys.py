@@ -33,6 +33,8 @@ MHMAT_KEYS.append(MHMATFileKey("normalmapTexture", None, 'Texture'))
 MHMAT_KEYS.append(MHMATFileKey("displacementmapTexture", None, 'Texture'))
 MHMAT_KEYS.append(MHMATFileKey("specularmapTexture", None, 'Texture'))
 MHMAT_KEYS.append(MHMATFileKey("transparencymapTexture", None, 'Texture'))
+MHMAT_KEYS.append(MHMATFileKey("roughnessmapTexture", None, 'Texture'))
+MHMAT_KEYS.append(MHMATFileKey("metallicmapTexture", None, 'Texture'))
 MHMAT_KEYS.append(MHMATFileKey("aomapTexture", None, 'Texture'))
                                  
 ### INTENSITIES ###

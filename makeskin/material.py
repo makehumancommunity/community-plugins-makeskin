@@ -97,6 +97,16 @@ class MHMat:
         if dtp and str(dtp).strip():
             sett["transparencymapTexture"] = str(dtp).strip()
 
+        sett["roughnessmapTexture"] = None
+        dtp = nh.findRoughnessTextureFilePath()
+        if dtp and str(dtp).strip():
+            sett["roughnessmapTexture"] = str(dtp).strip()
+
+        sett["metallicmapTexture"] = None
+        dtp = nh.findMetallicTextureFilePath()
+        if dtp and str(dtp).strip():
+            sett["metallicmapTexture"] = str(dtp).strip()
+
         sett["bumpmapTexture"] = None
         dtp = nh.findBumpMapTextureFilePath()
         if dtp and str(dtp).strip():
@@ -171,7 +181,7 @@ class MHMat:
                     if adjustSettings:
                         self.settings[key] = baseName
 
-    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False, displacePH=False):
+    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False, displacePH=False, roughnessPH=False, metallicPH=False):
         if obj is None:
             return
         now = datetime.now()
@@ -183,6 +193,12 @@ class MHMat:
 
         if self.settings["transparencymapTexture"] or transpPH:
             self.nodehelper.createTransparencyTextureNode(self.settings["transparencymapTexture"])
+
+        if self.settings["metallicmapTexture"] or metallicPH:
+            self.nodehelper.createMetallicTextureNode(self.settings["metallicmapTexture"])
+
+        if self.settings["roughnessmapTexture"] or roughnessPH:
+            self.nodehelper.createRoughnessTextureNode(self.settings["roughnessmapTexture"])
 
         if self.settings["displacementmapTexture"] or displacePH:
             self.nodehelper.createDisplacementTextureNode(self.settings["displacementmapTexture"])
@@ -221,7 +237,7 @@ class MHMat:
 
         if self.settings["ior"] is not None:
             self.nodehelper.setPrincipledSocketDefaultValue("IOR", self.settings["ior"])
-
+        
         bump = bumpPH
         if self.settings["bumpmapTexture"]:
             bump = True
