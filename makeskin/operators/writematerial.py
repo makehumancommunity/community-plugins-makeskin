@@ -92,7 +92,7 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
         if mhmat.settings["writeBlendMaterial"]:
             try:  matName = obj.material_slots[1].name
             except IndexError:
-              msg = "Object dose not have a second material."
+              msg = "Object does not have a second material."
               self.report({'ERROR'}, msg)
               raise IndexError(msg)
             

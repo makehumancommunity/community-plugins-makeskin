@@ -54,7 +54,7 @@ MHMAT_KEYS.append(MHMATFloatKey("sssBScale", None, 'SSS'))
 
 ### VARIOUS ###
         
-MHMAT_KEYS.append(MHMATFileKey("blendMaterial", None, 'Various'))
+MHMAT_KEYS.append(MHMATFileKey("blendMaterial", None, 'Various', blendMaterial=True))
 MHMAT_KEYS.append(MHMATFloatKey("metallic", None, 'Various'))
 MHMAT_KEYS.append(MHMATFloatKey("ior", None, 'Various'))
 MHMAT_KEYS.append(MHMATFloatKey("roughness", 0.7, 'Various'))

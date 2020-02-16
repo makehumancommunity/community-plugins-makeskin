@@ -41,8 +41,9 @@ class MHMATStringKey(MHMATKey):
 
 class MHMATFileKey(MHMATKey):
 
-    def __init__(self, keyName, defaultValue=None, keyGroup="Various"):
+    def __init__(self, keyName, defaultValue=None, keyGroup="Various", blendMaterial=False):
         MHMATKey.__init__(self, keyName=keyName, defaultValue=defaultValue, keyGroup=keyGroup)
+        self.blendMaterial = blendMaterial
 
     def parseFile(self, inputLine, location):
         line = str(inputLine).strip()
@@ -51,7 +52,12 @@ class MHMATFileKey(MHMATKey):
             match = re.search(r'^([a-zA-Z]+)\s+(.*)$', line)
             if match:
                 value = str(match.group(2)).strip()
-        value = location + "/" + os.path.basename(value)
+        if not self.blendMaterial:
+            value = location + "/" + os.path.basename(value)
+        else:
+            # TODO: handle case where location is absolute. We cannot use basename since the path
+            # TODO: continues into the structure of the file
+            value = location + "/" + value
         return self.keyName, value
 
 
