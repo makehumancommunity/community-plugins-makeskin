@@ -68,9 +68,9 @@ class MHMat:
         if tn and not nh.findBumpMapTextureFilePath():
             return pre + "a bump map " + post
 
-        tn = nh.findTransparencyTextureNode()
-        if tn and not nh.findTransparencyTextureFilePath():
-            return pre + "a transparency map " + post
+        tn = nh.findTransmissionTextureNode()
+        if tn and not nh.findTransmissionTextureFilePath():
+            return pre + "a transmission map " + post
 
         return ""
 
@@ -92,10 +92,10 @@ class MHMat:
         if dtp and str(dtp).strip():
             sett["diffuseTexture"] = str(dtp).strip()
 
-        sett["transparencymapTexture"] = None
-        dtp = nh.findTransparencyTextureFilePath()
+        sett["transmissionmapTexture"] = None
+        dtp = nh.findTransmissionTextureFilePath()
         if dtp and str(dtp).strip():
-            sett["transparencymapTexture"] = str(dtp).strip()
+            sett["transmissionmapTexture"] = str(dtp).strip()
 
         sett["roughnessmapTexture"] = None
         dtp = nh.findRoughnessTextureFilePath()
@@ -191,8 +191,8 @@ class MHMat:
         if self.settings["diffuseTexture"] or diffusePH:
             self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
 
-        if self.settings["transparencymapTexture"] or transpPH:
-            self.nodehelper.createTransparencyTextureNode(self.settings["transparencymapTexture"])
+        if self.settings["transmissionmapTexture"] or transpPH:
+            self.nodehelper.createTransmissionTextureNode(self.settings["transmissionmapTexture"])
 
         if self.settings["metallicmapTexture"] or metallicPH:
             self.nodehelper.createMetallicTextureNode(self.settings["metallicmapTexture"])

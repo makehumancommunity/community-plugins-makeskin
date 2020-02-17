@@ -9,7 +9,7 @@ import pprint, os
 _coords = dict()
 _coords["diffuseTexture"] = [-500.0, 300.0]
 _coords["diffuseIntensity"] = [-200, 400]
-_coords["transparencyTexture"] = [-800.0, 200.0]
+_coords["transmissionTexture"] = [-800.0, 200.0]
 _coords["normalMapTextureSolo"] = [-600.0, -300.0]
 _coords["normalMapSolo"] = [-250.0, -200.0]
 _coords["bumpMapTextureSolo"] = [-600.0, 300.0]
@@ -213,21 +213,21 @@ class NodeHelper:
     def findDiffuseTextureFilePath(self):
         return self._findTexureFileName("diffuseTexture")
 
-    ##### TRANSPARENCY #####
+    ##### TRANSMISSION #####
 
-    def createTransparencyTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
-        transparencyTextureNode = self._createImageTextureNode(imagePathAbsolute, "transparencyTexture", colorspace="Non-Color")
+    def createTransmissionTextureNode(self, imagePathAbsolute=None, linkToPrincipled=True):
+        transmissionTextureNode = self._createImageTextureNode(imagePathAbsolute, "transmissionTexture", colorspace="Non-Color")
         if linkToPrincipled and self._principledNode:
-            self._nodetree.links.new(transparencyTextureNode.outputs["Color"], self._principledNode.inputs["Transmission"])
-        transparencyTextureNode.name = "transparencymapTexture"
-        transparencyTextureNode.label = "Transparencymap Texture"
-        return transparencyTextureNode
+            self._nodetree.links.new(transmissionTextureNode.outputs["Color"], self._principledNode.inputs["Transmission"])
+        transmissionTextureNode.name = "transmissionmapTexture"
+        transmissionTextureNode.label = "Transmissionmap Texture"
+        return transmissionTextureNode
 
-    def findTransparencyTextureNode(self):
-        return self.findNodeByName("transparencymapTexture")
+    def findTransmissionTextureNode(self):
+        return self.findNodeByName("transmissionmapTexture")
 
-    def findTransparencyTextureFilePath(self):
-        return self._findTexureFileName("transparencymapTexture")
+    def findTransmissionTextureFilePath(self):
+        return self._findTexureFileName("transmissionmapTexture")
 
     ##### ROUGHNESS #####
 

@@ -36,7 +36,7 @@ class MHS_OT_CreateMaterialOperator(bpy.types.Operator):
         dPH = scn.MhMsCreateDiffuse
         nPH = scn.MhMsCreateNormal
         bPH = scn.MhMsCreateBump
-        tPH = scn.MhMsCreateTransp
+        tPH = scn.MhMsCreateTrans
         rPH = scn.MhMsCreateRough
         mPH = scn.MhMsCreateMetallic
         disPH = scn.MhMsCreateDisp
