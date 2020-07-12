@@ -5,6 +5,7 @@ import bpy
 import bpy.types
 import re, os
 from .utils import createEmptyMaterial
+from .extraproperties import _licenses
 from .nodehelper import NodeHelper
 from .mhmat_keys import MHMAT_KEYS, MHMAT_SHADER_KEYS, MHMAT_KEY_GROUPS, MHMAT_NAME_TO_KEY
 from .keytypes import *
@@ -190,14 +191,44 @@ class MHMat:
         mat = createEmptyMaterial(obj,name)
         self.nodehelper = NodeHelper(obj)
 
+        # --- visualization of MakeHuman internals in node-setup
+        #
         # create node-frame for MakeHuman additional nodes
         #
         frame = self.nodehelper.createMHNodeFrame ("MakeHuman Internal")
 
         # now add all internal values to this frame
         #
-        for name in [ "shadeless", "wireframe", "transparent", "alphaToCoverage", "backfaceCull", "depthless", "castShadows", "receiveShadows" ]:
-            self.nodehelper.createDummyNode(name, self.settings[name], frame)
+        for nodename in [ "shadeless", "wireframe", "transparent", "alphaToCoverage", "backfaceCull", "depthless", "castShadows", "receiveShadows" ]:
+            self.nodehelper.createDummyNode(nodename, self.settings[nodename], frame)
+
+        # --- set the values in the menu (needed after import)
+        #
+        obj.MhMsName = name
+
+        # license must fit to the values allowed
+        #
+        for elem in _licenses:
+            if self.settings["license"] == elem[0]:
+                obj.MhMsMatLicense = self.settings["license"]
+                break
+
+        if self.settings["description"]:
+            obj.MhMsDescription = self.settings["description"]
+        if self.settings["tag"]:
+            obj.MhMsTag = self.settings["tag"]
+        if self.settings["author"]:
+            obj.MhMsAuthor = self.settings["author"]
+        if self.settings["homepage"]:
+            obj.MhMsHomepage = self.settings["homepage"]
+
+        obj.MhMsShadeless = self.settings["shadeless"]
+        obj.MhMsTransparent = self.settings["transparent"]
+        obj.MhMsAlphaToCoverage = self.settings["alphaToCoverage"]
+        obj.MhMsBackfaceCull = self.settings["backfaceCull"]
+        obj.MhMsDepthless = self.settings["depthless"]
+        obj.MhMsCastShadows = self.settings["castShadows"]
+        obj.MhMsReceiveShadows = self.settings["receiveShadows"]
 
         if self.settings["diffuseTexture"] or diffusePH:
             self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
@@ -216,7 +247,11 @@ class MHMat:
 
         if self.settings["diffuseColor"] is not None:
             col = self.settings["diffuseColor"]
-            col.append(1.0)
+
+            # TODO weird hack to be changed later, but otherwise col grows to infinity when 2nd material is added ;)
+            if len(col) < 4:
+                col.append(1.0)
+
             self.nodehelper.setPrincipledSocketDefaultValue("Base Color", col)
             diffuseIntensity = self.nodehelper.findNodeByName("diffuseIntensity")
             if diffuseIntensity:
@@ -294,7 +329,16 @@ class MHMat:
                                 (usedKey, value) = keyObj.parse(parsedLine)
                         else:
                             print("Not a valid key: " + key)
-                        self.settings[key] = value
+                        #
+                        # handle multiple occurences of tag (create a comma-separated entry)
+                        #
+                        if key == 'tag':
+                            if self.settings[key]:
+                                self.settings[key] += ", " + value;
+                            else:
+                                self.settings[key] = value
+                        else:
+                            self.settings[key] = value
                     else:
                         if parsedLine.startswith("shader"):
                             pass
@@ -314,7 +358,11 @@ class MHMat:
                 keyObj = MHMAT_NAME_TO_KEY[keyNameLower]
                 keyName = keyObj.keyName
                 if keyObj.keyGroup == keyGroup and not self.settings[keyName] is None:
-                    mat = mat + keyName + " " + keyObj.asString(self.settings[keyName]) + "\n"
+                    if keyName == "tag":
+                        for elem in self.settings["tag"].split(","):
+                            mat = mat + "tag " + elem.strip() + "\n"
+                    else:
+                        mat = mat + keyName + " " + keyObj.asString(self.settings[keyName]) + "\n"
 
         mat = mat + "\n"
         mat = mat + "// Shader properties (only affects how things look in MakeHuman)\n\n"
