@@ -4,6 +4,7 @@
 import bpy
 from ..material import MHMat
 from ..utils import hasMaterial
+from datetime import datetime
 
 class MHS_OT_CreateMaterialOperator(bpy.types.Operator):
     """Create template material"""
@@ -42,7 +43,10 @@ class MHS_OT_CreateMaterialOperator(bpy.types.Operator):
         disPH = scn.MhMsCreateDisp
 
         mhmat = MHMat()
-        mhmat.assignAsNodesMaterialForObj(obj, diffusePH=dPH, normalPH=nPH, bumpPH=bPH, transpPH=tPH, displacePH=disPH, roughnessPH=rPH, metallicPH=mPH)
+
+        now = datetime.now()
+        name = "makeskin." + now.strftime("%Y%m%d%H:%M:%S")
+        mhmat.assignAsNodesMaterialForObj(obj, name, diffusePH=dPH, normalPH=nPH, bumpPH=bPH, transpPH=tPH, displacePH=disPH, roughnessPH=rPH, metallicPH=mPH)
 
         self.report({'INFO'}, "A template material was created")
         return {'FINISHED'}

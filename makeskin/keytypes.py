@@ -23,6 +23,8 @@ class MHMATKey:
     def asString(self, value):
         return str(value)
 
+# parse lines like name, description
+#
 
 class MHMATStringKey(MHMATKey):
 
@@ -38,6 +40,8 @@ class MHMATStringKey(MHMATKey):
                 value = str(match.group(2)).strip()
         return self.keyName, value
 
+# parse filenames like diffuseTexture, normalmapTexture ...
+#
 
 class MHMATFileKey(MHMATKey):
 

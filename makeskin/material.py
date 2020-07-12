@@ -8,7 +8,6 @@ from .utils import createEmptyMaterial
 from .nodehelper import NodeHelper
 from .mhmat_keys import MHMAT_KEYS, MHMAT_SHADER_KEYS, MHMAT_KEY_GROUPS, MHMAT_NAME_TO_KEY
 from .keytypes import *
-from datetime import datetime
 import shutil
 
 class MHMat:
@@ -181,13 +180,25 @@ class MHMat:
                     if adjustSettings:
                         self.settings[key] = baseName
 
-    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False, displacePH=False, roughnessPH=False, metallicPH=False):
+    def assignAsNodesMaterialForObj(self, obj, name, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False, displacePH=False, roughnessPH=False, metallicPH=False):
         if obj is None:
             return
-        now = datetime.now()
-        name = "makeskin." + now.strftime("%Y%m%d%H:%M:%S")
+
+        if name is None:
+            name = self.settings["name"]
+
         mat = createEmptyMaterial(obj,name)
         self.nodehelper = NodeHelper(obj)
+
+        # create node-frame for MakeHuman additional nodes
+        #
+        frame = self.nodehelper.createMHNodeFrame ("MakeHuman Internal")
+
+        # now add all internal values to this frame
+        #
+        for name in [ "shadeless", "wireframe", "transparent", "alphaToCoverage", "backfaceCull", "depthless", "castShadows", "receiveShadows" ]:
+            self.nodehelper.createDummyNode(name, self.settings[name], frame)
+
         if self.settings["diffuseTexture"] or diffusePH:
             self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
 
@@ -253,6 +264,7 @@ class MHMat:
                 self.nodehelper.createOnlyBump(bumpImagePathAbsolute=self.settings["bumpmapTexture"])
             if normal:
                 self.nodehelper.createOnlyNormal(normalImagePathAbsolute=self.settings["normalmapTexture"])
+
         return mat
 
     def _parseFile(self, fileName):

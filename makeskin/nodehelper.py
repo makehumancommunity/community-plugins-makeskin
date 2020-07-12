@@ -23,6 +23,18 @@ _coords["displacementTexture"] = [-300.0, -550.0]
 _coords["roughnessTexture"] = [-1000.0, -100.0]
 _coords["metallicTexture"] = [-1000.0, 450.0]
 
+# dummy nodes
+
+_coords["shadeless"] = [500.0, 450.0]
+_coords["wireframe"] = [500.0, 350.0]
+_coords["transparent"] = [500.0, 250.0]
+_coords["alphaToCoverage"] = [500.0, 150.0]
+_coords["backfaceCull"] = [500.0, 50.0]
+_coords["depthless"] =  [500.0, -50.0]
+_coords["castShadows"] = [500.0, -150.0]
+_coords["receiveShadows"] = [500.0, -250.0]
+
+
 class NodeHelper:
 
     def __init__(self, obj):
@@ -105,7 +117,26 @@ class NodeHelper:
             image.colorspace_settings.name = colorspace
             newTextureNode.image = image
         return newTextureNode
-    
+
+    # create MakeHuman Nodeframe
+    def createMHNodeFrame(self, name):
+        frame_node = self._nodetree.nodes.new("NodeFrame")
+        frame_node.label = name
+        frame_node.name = name
+        return frame_node
+
+    # create unlinked value nodes
+    #
+    def createDummyNode(self, name, value, parent):
+        print ("Dummynode " + name + " " + str(value))
+        node = self._nodetree.nodes.new("ShaderNodeValue")
+        node.location = _coords[name]
+        node.parent = parent
+        node.name = name
+        node.label = name
+        if type(value) is bool:
+            node.outputs["Value"].default_value = float(value)
+        return node
 
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
