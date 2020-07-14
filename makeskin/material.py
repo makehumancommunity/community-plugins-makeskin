@@ -204,7 +204,7 @@ class MHMat:
 
         # --- set the values in the menu (needed after import)
         #
-        obj.MhMsName = name
+        obj.MhMsName = mat.name # using mat.name instead of mat will take the real name like asset.001
 
         # license must fit to the values allowed
         #

@@ -7,6 +7,9 @@ from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, C
 from ..material import MHMat
 from ..utils import hasMaterial, blendMatSave
 
+#  create a predefined name of the material (not untitled) from the material name itself
+#
+#
 class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
     """Write material to MHMAT file"""
     bl_idname = "makeskin.write_material"
@@ -16,6 +19,12 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
     filename_ext = '.mhmat'
 
     filter_glob: StringProperty(default='*.mhmat', options={'HIDDEN'})
+    filepath: StringProperty(
+            name="File Path",
+            description="Filepath used for exporting the file",
+            maxlen=1024,
+            subtype='FILE_PATH',
+            )
 
     @classmethod
     def poll(self, context):
@@ -24,6 +33,18 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
                 return False
             return True
         return False
+
+    def invoke(self, context, event):
+        import os
+        if not self.filepath:
+            blend_filepath = context.active_object.MhMsName;
+            # just in case ... ;)
+            if not blend_filepath:
+                blend_filepath = "untitled"
+            self.filepath = blend_filepath + self.filename_ext
+
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
     def execute(self, context):
 
