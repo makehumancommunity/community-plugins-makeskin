@@ -49,28 +49,35 @@ class MHMat:
         if not fileName is None:
             self._parseFile(fileName)
 
+    # test for all texture nodes and add an error text to be displayed on blender
+    #
     def checkAllTexturesAreSaved(self):
 
         nh = self.nodehelper
 
-        pre = "There is "
-        post = " texture node, but it doesn't point at a physical file. You will need to save the image to a file before trying to save the material."
-
         tn = nh.findDiffuseTextureNode()
-        if tn and not nh.findDiffuseTextureFilePath():
-            return pre + "a diffuse image " + post
+        if tn:
+            (name, err) = nh.findDiffuseTextureFilePath()
+            if (err):
+                return "Diffuse image: " + err
 
         tn = nh.findNormalMapTextureNode()
-        if tn and not nh.findNormalMapTextureFilePath():
-            return pre + "a normal map " + post
+        if tn:
+            (name, err) = nh.findNormalMapTextureFilePath():
+            if (err):
+                return "Normal map: " + err
 
         tn = nh.findBumpMapTextureNode()
-        if tn and not nh.findBumpMapTextureFilePath():
-            return pre + "a bump map " + post
+        if tn:
+            (name, err) = nh.findBumpMapTextureFilePath():
+            if (err):
+                return "Bump map: " + err
 
         tn = nh.findTransmissionTextureNode()
-        if tn and not nh.findTransmissionTextureFilePath():
-            return pre + "a transmission map " + post
+        if tn:
+            (name, err) = nh.findTransmissionTextureFilePath():
+            if (err):
+                return "Transmission map: " + err
 
         return ""
 

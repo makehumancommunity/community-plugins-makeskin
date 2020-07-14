@@ -194,26 +194,29 @@ class NodeHelper:
         nm.location = _coords["normalMapSolo"]
         return nmt
 
+    # test if a textureNode is well-defined, in case of error, return reason
+    #
     def _extractImageFilePath(self, textureNode):
         if not textureNode:
-            print("WARNING: trying to find texture for None node")
-            return None
+            return (None, "WARNING: to test a None node for filename")
         if textureNode.image:
             if textureNode.image.filepath or textureNode.image.filepath_raw:
                 if textureNode.image.filepath:
-                    return bpy.path.abspath(textureNode.image.filepath)
+                    path = bpy.path.abspath(textureNode.image.filepath)
+                    if os.path.isfile(path):
+                        return (path, None)
+                    return (None, path + " is not a file")
                 else:
-                    return bpy.path.abspath(textureNode.image.filepath_raw)
+                    return (bpy.path.abspath(textureNode.image.filepath_raw), None) #  file test?!
             else:
-                print("Found image texture with an image property, but the image had an empty file path.")
+                return (None, "Found image texture with an image property, but the image had an empty file path.")
         else:
-            print("Found an image texture, but its image property was empty.")
-        return None
+            return (None, "Found an image texture, but its image property is empty.")
 
-    def _findTexureFileName(self, nodeName):
+    def _findTextureFileName(self, nodeName):
         node = self.findNodeByName(nodeName)
         if not node:
-            return None
+            return (None, None)
         return self._extractImageFilePath(node)
 
     ##### DIFFUSE #####
@@ -242,7 +245,7 @@ class NodeHelper:
         return self.findNodeByName("diffuseTexture")
 
     def findDiffuseTextureFilePath(self):
-        return self._findTexureFileName("diffuseTexture")
+        return self._findTextureFileName("diffuseTexture")
 
     ##### TRANSMISSION #####
 
@@ -258,7 +261,7 @@ class NodeHelper:
         return self.findNodeByName("transmissionmapTexture")
 
     def findTransmissionTextureFilePath(self):
-        return self._findTexureFileName("transmissionmapTexture")
+        return self._findTextureFileName("transmissionmapTexture")
 
     ##### ROUGHNESS #####
 
@@ -274,7 +277,7 @@ class NodeHelper:
         return self.findNodeByName("roughnessmapTexture")
 
     def findRoughnessTextureFilePath(self):
-        return self._findTexureFileName("roughnessmapTexture")
+        return self._findTextureFileName("roughnessmapTexture")
 
     ##### METALLIC #####
 
@@ -290,7 +293,7 @@ class NodeHelper:
         return self.findNodeByName("metallicmapTexture")
 
     def findMetallicTextureFilePath(self):
-        return self._findTexureFileName("metallicmapTexture")
+        return self._findTextureFileName("metallicmapTexture")
 
     ##### BUMP #####
 
@@ -304,7 +307,7 @@ class NodeHelper:
         return self.findNodeSocketDefaultValue("bumpmap", "Strength")
 
     def findBumpMapTextureFilePath(self):
-        return self._findTexureFileName("bumpmapTexture")
+        return self._findTextureFileName("bumpmapTexture")
 
     ##### NORMAL #####
 
@@ -318,7 +321,7 @@ class NodeHelper:
         return self.findNodeSocketDefaultValue("normalmap", "Strength")
 
     def findNormalMapTextureFilePath(self):
-        return self._findTexureFileName("normalmapTexture")
+        return self._findTextureFileName("normalmapTexture")
 
     ##### DISPLACEMENT #####
 
@@ -343,7 +346,7 @@ class NodeHelper:
         return self.findNodeByName("displacementmapTexture")
 
     def findDisplacementTextureFilePath(self):
-        return self._findTexureFileName("displacementmapTexture")
+        return self._findTextureFileName("displacementmapTexture")
 
     def findDisplacementMapIntensity(self):
         return self.findNodeSocketDefaultValue("displacementmap", "Scale")
