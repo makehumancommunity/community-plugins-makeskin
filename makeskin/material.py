@@ -95,39 +95,40 @@ class MHMat:
         nh = self.nodehelper
 
         sett["diffuseTexture"] = None
-        dtp = nh.findDiffuseTextureFilePath()
+        (dtp, err) = nh.findDiffuseTextureFilePath()
         if dtp and str(dtp).strip():
             sett["diffuseTexture"] = str(dtp).strip()
 
         sett["transmissionmapTexture"] = None
-        dtp = nh.findTransmissionTextureFilePath()
+        (dtp, err) = nh.findTransmissionTextureFilePath()
         if dtp and str(dtp).strip():
             sett["transmissionmapTexture"] = str(dtp).strip()
 
         sett["roughnessmapTexture"] = None
-        dtp = nh.findRoughnessTextureFilePath()
+        (dtp, err) = nh.findRoughnessTextureFilePath()
         if dtp and str(dtp).strip():
             sett["roughnessmapTexture"] = str(dtp).strip()
 
         sett["metallicmapTexture"] = None
-        dtp = nh.findMetallicTextureFilePath()
+        (dtp, err) = nh.findMetallicTextureFilePath()
         if dtp and str(dtp).strip():
             sett["metallicmapTexture"] = str(dtp).strip()
 
         sett["bumpmapTexture"] = None
-        dtp = nh.findBumpMapTextureFilePath()
+        (dtp, err) = nh.findBumpMapTextureFilePath()
         if dtp and str(dtp).strip():
+            sett["metallicmapTexture"] = str(dtp).strip()
             sett["bumpmapTexture"] = str(dtp).strip()
             sett["bumpmapIntensity"] = nh.findBumpMapIntensity()
 
         sett["normalmapTexture"] = None
-        dtp = nh.findNormalMapTextureFilePath()
+        (dtp, err) = nh.findNormalMapTextureFilePath()
         if dtp and str(dtp).strip():
             sett["normalmapTexture"] = str(dtp).strip()
             sett["normalmapIntensity"] = nh.findNormalMapIntensity()
 
         sett["displacementmapTexture"] = None
-        dtp = nh.findDisplacementTextureFilePath()
+        (dtp, err) = nh.findDisplacementTextureFilePath()
         if dtp and str(dtp).strip():
             sett["displacementmapTexture"] = str(dtp).strip()
             sett["displacementmapIntensity"] = nh.findDisplacementMapIntensity()
@@ -182,6 +183,7 @@ class MHMat:
                     origLoc = os.path.abspath(origLoc)
                     destLoc = os.path.abspath(destLoc)
                     if origLoc != destLoc:
+                        print ("copy from " + origLoc  + " to " + destLoc)
                         shutil.copyfile(origLoc, destLoc)
                     else:
                         print("Source and destination is same file, skipping texture copy for this entry")
@@ -309,6 +311,75 @@ class MHMat:
 
         return mat
 
+    def writeMHmat(self, obj, fnAbsolute):
+
+        errtext = None
+
+        if obj.MhMsName:
+            self.settings['name'] = obj.MhMsName
+
+        if obj.MhMsTag:
+            self.settings['tag'] = obj.MhMsTag
+
+        if obj.MhMsDescription:
+            self.settings['description'] = obj.MhMsDescription
+
+        if obj.MhMsAuthor:
+            self.settings['author'] = obj.MhMsAuthor
+
+        if obj.MhMsHomepage:
+            self.settings['homepage'] = obj.MhMsHomepage
+
+        self.settings['license'] = obj.MhMsMatLicense
+        self.settings['backfaceCull'] = obj.MhMsBackfaceCull
+        self.settings['castShadows'] = obj.MhMsCastShadows
+        self.settings['receiveShadows'] = obj.MhMsReceiveShadows
+        self.settings['alphaToCoverage'] = obj.MhMsAlphaToCoverage
+        self.settings['shadeless'] = obj.MhMsShadeless
+        self.settings['wireframe'] = obj.MhMsWireframe
+        self.settings['transparent'] = obj.MhMsTransparent
+        self.settings['depthless'] = obj.MhMsDepthless
+        self.settings['sssEnable'] = obj.MhMsSSSEnable
+        self.settings['autoBlendSkin'] = obj.MhMsAutoBlend
+        self.settings['writeBlendMaterial'] = obj.MhMsWriteBlendMaterial
+
+        handling = "NORMALIZE"
+        if obj.MhMsTextures:
+            handling = obj.MhMsTextures
+        if handling == "NORMALIZE":
+            self.copyTextures(fnAbsolute)
+        if handling == "COPY":
+            self.copyTextures(fnAbsolute,normalize=False)
+        # If handling is LINK, then paths are already correct
+
+        if self.settings["normalmapTexture"]:
+            self.shaderConfig["normal"] = True
+        if self.settings["bumpmapTexture"]:
+            self.shaderConfig["bump"] = True
+        if obj.MhMsUseLit and obj.MhMsLitsphere:
+            self.litSphere = obj.MhMsLitsphere
+        if self.settings["displacementmapTexture"]:
+            self.shaderConfig["displacement"] = True
+        
+        ##- Save blend -##
+        if self.settings["writeBlendMaterial"]:
+            try:  matName = obj.material_slots[1].name
+            except IndexError:
+              errtext = "Object does not have a second material."
+              raise IndexError(errtext)
+            
+            from pathlib import Path
+            path = Path(fnAbsolute).with_suffix('.mat.blend')
+            self.settings["blendMaterial"] = path.name+'/materials/'+matName
+            blendMatSave(path)
+
+
+        with open(fnAbsolute,'w') as f:
+            f.write(str(self))
+
+        return (errtext)
+
+
     def _parseFile(self, fileName):
 
         full = os.path.abspath(fileName)
@@ -355,7 +426,7 @@ class MHMat:
                             print(parsedLine)
                 line = f.readline()
         print(self)
-            
+
     def __str__(self):
         mat = "# This is a material file for MakeHuman, produced by MakeSkin\n"
 
