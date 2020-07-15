@@ -63,19 +63,19 @@ class MHMat:
 
         tn = nh.findNormalMapTextureNode()
         if tn:
-            (name, err) = nh.findNormalMapTextureFilePath():
+            (name, err) = nh.findNormalMapTextureFilePath()
             if (err):
                 return "Normal map: " + err
 
         tn = nh.findBumpMapTextureNode()
         if tn:
-            (name, err) = nh.findBumpMapTextureFilePath():
+            (name, err) = nh.findBumpMapTextureFilePath()
             if (err):
                 return "Bump map: " + err
 
         tn = nh.findTransmissionTextureNode()
         if tn:
-            (name, err) = nh.findTransmissionTextureFilePath():
+            (name, err) = nh.findTransmissionTextureFilePath()
             if (err):
                 return "Transmission map: " + err
 
@@ -255,7 +255,7 @@ class MHMat:
         if self.settings["diffuseColor"] is not None:
             col = self.settings["diffuseColor"]
 
-            # TODO weird hack to be changed later, but otherwise col grows to infinity when 2nd material is added ;)
+            # TODO weird hack to be changed later, but otherwise col grows to infinity when 2nd material is added 
             if len(col) < 4:
                 col.append(1.0)
 
@@ -341,7 +341,7 @@ class MHMat:
                         #
                         if key == 'tag':
                             if self.settings[key]:
-                                self.settings[key] += ", " + value;
+                                self.settings[key] += ", " + value
                             else:
                                 self.settings[key] = value
                         else:
