@@ -5,7 +5,7 @@ import bpy
 import bpy.types
 import re, os
 from .utils import createEmptyMaterial
-from .extraproperties import _licenses
+from .extraproperties import _licenses, _litspheres
 from .nodehelper import NodeHelper
 from .mhmat_keys import MHMAT_KEYS, MHMAT_SHADER_KEYS, MHMAT_KEY_GROUPS, MHMAT_NAME_TO_KEY
 from .keytypes import *
@@ -23,6 +23,7 @@ class MHMat:
 
         for keyObj in MHMAT_KEYS:
             self.settings[keyObj.keyName] = keyObj.defaultValue
+            print (keyObj.keyName)
 
         # Internal variables for parsing object material
         self._nodes = None
@@ -190,26 +191,58 @@ class MHMat:
                     if adjustSettings:
                         self.settings[key] = baseName
 
-    def assignAsNodesMaterialForObj(self, obj, name, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False, displacePH=False, roughnessPH=False, metallicPH=False):
-        if obj is None:
+    #
+    # create a node-setup for a new or loaded material
+    # take information from scene and objects
+    #
+    def assignAsNodesMaterialForObj(self, scn, obj, mode_load=False):
+        if obj is None or scn is None:
             return
 
-        if name is None:
+        diffusePH=False
+        bumpPH=False
+        normalPH=False
+        transpPH=False
+        displacePH=False
+        roughnessPH=False
+        metallicPH=False
+        name = None
+
+        if mode_load is False:
+            diffusePH = scn.MhMsCreateDiffuse
+            normalPH = scn.MhMsCreateNormal
+            bumpPH = scn.MhMsCreateBump
+            transpPH = scn.MhMsCreateTrans
+            roughnessPH = scn.MhMsCreateRough
+            metallicPH = scn.MhMsCreateMetallic
+            displacePH = scn.MhMsCreateDisp
+            name = obj.name
+            self.settings["litsphereTexture"] = obj.MhMsLitsphere
+            self.settings["shadeless"] = obj.MhMsShadeless
+            self.settings["transparent"] = obj.MhMsTransparent
+            self.settings["alphaToCoverage"] = obj.MhMsAlphaToCoverage
+            self.settings["backfaceCull"] = obj.MhMsBackfaceCull
+            self.settings["depthless"] = obj.MhMsDepthless
+            self.settings["castShadows"] = obj.MhMsCastShadows
+            self.settings["receiveShadows"] = obj.MhMsReceiveShadows
+            self.settings["wireframe"] = obj.MhMsWireframe
+        else:
             name = self.settings["name"]
+            obj.MhMsShadeless = self.settings["shadeless"]
+            obj.MhMsTransparent = self.settings["transparent"]
+            obj.MhMsAlphaToCoverage = self.settings["alphaToCoverage"]
+            obj.MhMsBackfaceCull = self.settings["backfaceCull"]
+            obj.MhMsDepthless = self.settings["depthless"]
+            obj.MhMsCastShadows = self.settings["castShadows"]
+            obj.MhMsReceiveShadows = self.settings["receiveShadows"]
+            obj.MhMsWireframe = self.settings["wireframe"]
+            for elem in _litspheres:
+                if self.settings["litsphereTexture"] == elem[0]:
+                    obj.MhMsLitsphere = self.settings["litsphereTexture"]
+                    break
 
         mat = createEmptyMaterial(obj,name)
         self.nodehelper = NodeHelper(obj)
-
-        # --- visualization of MakeHuman internals in node-setup
-        #
-        # create node-frame for MakeHuman additional nodes
-        #
-        frame = self.nodehelper.createMHNodeFrame ("MakeHuman Internal")
-
-        # now add all internal values to this frame
-        #
-        for nodename in [ "shadeless", "wireframe", "transparent", "alphaToCoverage", "backfaceCull", "depthless", "castShadows", "receiveShadows" ]:
-            self.nodehelper.createDummyNode(nodename, self.settings[nodename], frame)
 
         # --- set the values in the menu (needed after import)
         #
@@ -231,13 +264,19 @@ class MHMat:
         if self.settings["homepage"]:
             obj.MhMsHomepage = self.settings["homepage"]
 
-        obj.MhMsShadeless = self.settings["shadeless"]
-        obj.MhMsTransparent = self.settings["transparent"]
-        obj.MhMsAlphaToCoverage = self.settings["alphaToCoverage"]
-        obj.MhMsBackfaceCull = self.settings["backfaceCull"]
-        obj.MhMsDepthless = self.settings["depthless"]
-        obj.MhMsCastShadows = self.settings["castShadows"]
-        obj.MhMsReceiveShadows = self.settings["receiveShadows"]
+
+        # --- visualization of MakeHuman internals in node-setup
+        #
+        # create node-frame for MakeHuman additional nodes
+        #
+        if scn.MhMsNodeVis:
+            frame = self.nodehelper.createMHNodeFrame ("MakeHuman Internal")
+
+            # now add all internal values to this frame
+            #
+            for nodename in [ "shadeless", "wireframe", "transparent", "alphaToCoverage", "backfaceCull", "depthless", "castShadows", "receiveShadows", "litsphereTexture" ]:
+                self.nodehelper.createDummyNode(nodename, self.settings[nodename], frame)
+
 
         if self.settings["diffuseTexture"] or diffusePH:
             self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
@@ -415,12 +454,18 @@ class MHMat:
                                 self.settings[key] += ", " + value
                             else:
                                 self.settings[key] = value
+                        elif key == 'shaderParam':
+                            if value[0] == "litsphereTexture":
+                                match = re.search(r'^litspheres\/(.*)\.png$', value[1])
+                                if match:
+                                    self.settings["litsphereTexture"] = match.group(1)
+                                    print (self.settings["litsphereTexture"])
                         else:
                             self.settings[key] = value
                     else:
                         if parsedLine.startswith("shader"):
+                            # TODO: check for shaderConfig, shader 
                             pass
-                            # TODO: check for shaderConfig, shader and shaderParam
                         else:
                             print("no match")
                             print(parsedLine)
@@ -447,7 +492,7 @@ class MHMat:
 
         if self.litSphere:
             mat = mat + "shader shaders/glsl/litsphere\n"
-            mat = mat + "shaderParam litsphereTexture litspheres/lit_" + str(self.litSphere) + ".png\n"
+            mat = mat + "shaderParam litsphereTexture litspheres/" + str(self.litSphere) + ".png\n"
         for key in self.shaderConfig.keys():
             mat = mat + "shaderConfig " + key + " " + str(self.shaderConfig[key]) + "\n"
 

@@ -21,14 +21,19 @@ _textures.append(("LINK", "Link", "Link to original location, with absolute path
 _texturesDescription = "How do we handle texture file names and paths? Unless you know what you are doing, you will want to use normalize. This will copy all images to an appropriate location with an appropriate filename, valid for uploading to the asset repository."
 
 _litspheres = []
-_litspheres.append(("leather", "leather", "Leather litsphere. This is appropriate for all clothes, not only leather.", 1))
-_litspheres.append(("standard_skin", "standard skin", "Standard skin litsphere. This is appropriate for all skins.", 2))
-_litspheres.append(("african", "african skin", "African skin litsphere", 3))
-_litspheres.append(("asian", "asian skin", "Asian skin litsphere", 4))
-_litspheres.append(("caucasian", "caucasian skin", "Caucasian skin litsphere", 5))
-_litspheres.append(("toon01", "toon", "Toon skin litsphere", 6))
-_litspheres.append(("eye", "eye", "Eye litsphere", 7))
-_litspheres.append(("hair", "hair", "Hair litsphere", 8))
+_litspheres.append(("lit_leather", "leather", "Leather litsphere. This is appropriate for all clothes, not only leather.", 1))
+_litspheres.append(("lit_standard_skin", "standard skin", "Standard skin litsphere. This is appropriate for all skins.", 2))
+_litspheres.append(("lit_african", "african skin", "African skin litsphere", 3))
+_litspheres.append(("lit_asian", "asian skin", "Asian skin litsphere", 4))
+_litspheres.append(("lit_caucasian", "caucasian skin", "Caucasian skin litsphere", 5))
+_litspheres.append(("lit_toon01", "toon", "Toon skin litsphere", 6))
+_litspheres.append(("skinmat_eye", "eye", "Eye litsphere", 7))
+_litspheres.append(("lit_hair", "hair", "The standard hair litsphere without effects", 8))
+_litspheres.append(("lit_matte", "matte", "A litsphere to create a mat finish e.g. for a suit", 9))
+_litspheres.append(("lit_refl_sharp", "sharp reflection", "A litsphere designed to simulate reflection on dark leather (shoes)", 10))
+_litspheres.append(("lit_refl_sharp_aniso", "sharp anisotropic reflection", "A anisotropic litsphere with a mat finish", 11))
+_litspheres.append(("lit_refl_sharp_aniso_hard", "dark hair anisotropic reflection", "A sharp anisotropic litsphere, typically used for dark hair", 12))
+_litspheres.append(("lit_refl_sharp_aniso_hard_blonde", "blonde anisotropic reflection", "A sharp anisotropic litsphere, typically used for blonde hair", 13))
 _litsphereDescription = "A litsphere texture is used for emulate lighting and reflections inside MakeHuman. It thus has no effect outside MakeHuman. For any clothing (not just leather), you will want to use the \"leather\" litsphere."
 
 def extraProperties():
@@ -47,8 +52,8 @@ def extraProperties():
     bpy.types.Scene.MhMsCreateRough = BoolProperty(name="Create roughness map placeholder", description="Create a placeholder for a roughness map", default=False)
     bpy.types.Scene.MhMsCreateDisp = BoolProperty(name="Create displacement map placeholder", description="Create a placeholder for a displacement map", default=False)
 
-    bpy.types.Scene.MhMsOverwrite1 = BoolProperty(name="Overwrite existing (create)", description="Overwrite existing material(s) on object", default=False)
-    bpy.types.Scene.MhMsOverwrite2 = BoolProperty(name="Overwrite existing (import)", description="Overwrite existing material(s) on object", default=False)
+    bpy.types.Scene.MhMsOverwrite = BoolProperty(name="Overwrite existing material", description="Overwrite existing material(s) on object", default=False)
+    bpy.types.Scene.MhMsNodeVis = BoolProperty(name="Extended node visualization", description="Creates special nodes to visualize MakeHuman properties", default=False)
 
     # Metadata keys
     bpy.types.Object.MhMsName = StringProperty(name="Name", description="The name of this material. This name is used for exports e.g. with mhx2.", default="material")
@@ -73,5 +78,5 @@ def extraProperties():
     bpy.types.Object.MhMsWriteBlendMaterial = BoolProperty(name="Write Blend material", description="Stores the second material on the active object in a blend file", default=False)
 
     # Options
-    bpy.types.Object.MhMsLitsphere = bpy.props.EnumProperty(items=_litspheres, name="Litsphere", description=_litsphereDescription, default="leather")
+    bpy.types.Object.MhMsLitsphere = bpy.props.EnumProperty(items=_litspheres, name="Litsphere", description=_litsphereDescription, default="lit_leather")
     bpy.types.Object.MhMsTextures = bpy.props.EnumProperty(items=_textures, name="Textures", description=_texturesDescription, default="NORMALIZE")

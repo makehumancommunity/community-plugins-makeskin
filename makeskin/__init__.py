@@ -21,7 +21,7 @@ bl_info = {
     'wiki_url': "http://www.makehumancommunity.org/",
     "category": "MakeHuman"}
 
-MAKESKIN_VERSION = 20200116
+MAKESKIN_VERSION = 20200718
 
 MAKESKIN_CLASSES = []
 MAKESKIN_CLASSES.extend(OPERATOR_CLASSES)

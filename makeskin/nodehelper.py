@@ -33,6 +33,7 @@ _coords["backfaceCull"] = [500.0, 50.0]
 _coords["depthless"] =  [500.0, -50.0]
 _coords["castShadows"] = [500.0, -150.0]
 _coords["receiveShadows"] = [500.0, -250.0]
+_coords["litsphereTexture"] = [500.0, -350.0]
 
 
 class NodeHelper:
@@ -128,14 +129,22 @@ class NodeHelper:
     # create unlinked value nodes
     #
     def createDummyNode(self, name, value, parent):
-        print ("Dummynode " + name + " " + str(value))
-        node = self._nodetree.nodes.new("ShaderNodeValue")
-        node.location = _coords[name]
-        node.parent = parent
-        node.name = name
-        node.label = name
+        # print ("Dummynode " + name + " " + str(value))
+        node = None
         if type(value) is bool:
+            node = self._nodetree.nodes.new("ShaderNodeValue")
             node.outputs["Value"].default_value = float(value)
+
+        if type(value) is str:
+            node = self._nodetree.nodes.new("ShaderNodeAttribute")
+            node.attribute_name = value
+
+        if node:
+            node.location = _coords[name]
+            node.parent = parent
+            node.name = name
+            node.label = name
+
         return node
 
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):

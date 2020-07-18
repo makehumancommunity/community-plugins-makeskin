@@ -139,7 +139,9 @@ class MHMATStringShaderKey(MHMATKey):
         if self.lineMatchesKey(line):
             match = re.search(r'^([a-zA-Z]+)\s+([^\s]+)\s+([^\s]+)$', line)
             if match:
-                value = str(match.group(3)).strip()
+                subkey = str(match.group(2))
+                ivalue = str(match.group(3)).strip()
+                value = [subkey, ivalue]
         return self.keyName, value
 
 class MHMATBooleanShaderKey(MHMATKey):

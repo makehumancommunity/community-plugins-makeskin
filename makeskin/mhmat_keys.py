@@ -16,6 +16,7 @@ MHMAT_KEYS.append(MHMATStringKey("uuid", None, 'Metadata'))
 MHMAT_KEYS.append(MHMATStringKey("license", 'CC0', 'Metadata'))
 MHMAT_KEYS.append(MHMATStringKey("homepage", None, 'Metadata'))
 MHMAT_KEYS.append(MHMATStringKey("author", None, 'Metadata'))
+MHMAT_KEYS.append(MHMATStringShaderKey("shaderParam", None, 'Metadata'))
             
 ### COLORS ###
         
@@ -57,6 +58,7 @@ MHMAT_KEYS.append(MHMATFloatKey("sssBScale", None, 'SSS'))
 
 ### VARIOUS ###
         
+MHMAT_KEYS.append(MHMATFileKey("litsphereTexture", "lit_leather", 'Various'))
 MHMAT_KEYS.append(MHMATFileKey("blendMaterial", None, 'Various', blendMaterial=True))
 MHMAT_KEYS.append(MHMATFloatKey("metallic", None, 'Various'))
 MHMAT_KEYS.append(MHMATFloatKey("ior", None, 'Various'))
