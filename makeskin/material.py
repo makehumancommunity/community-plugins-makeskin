@@ -167,7 +167,7 @@ class MHMat:
         (matBase, matExt) = os.path.splitext(matBaseName)
 
         for keyObj in MHMAT_KEYS:
-            if isinstance(keyObj, MHMATFileKey) and keyObj.keyName in self.settings:
+            if isinstance(keyObj, MHMATFileKey) and keyObj.keyName in self.settings and keyObj.keyName != "litsphereTexture":
                 key = keyObj.keyName
                 print(key)
                 origLoc = self.settings[key]
