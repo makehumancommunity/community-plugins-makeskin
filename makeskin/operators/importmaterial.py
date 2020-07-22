@@ -29,16 +29,15 @@ class MHS_OT_ImportMaterialOperator(bpy.types.Operator, ImportHelper):
         scn = context.scene
 
         if hasMaterial(obj):
-            print(scn.MhMsOverwrite2)
-            if not scn.MhMsOverwrite2:
-                self.report({'ERROR'}, "Object already has a material, and only one material at a time is supported")
+            if not scn.MhMsOverwrite:
+                self.report({'ERROR'}, "A material for this object already exists, change 'replace' option in common settings to overwrite material")
                 return {'FINISHED'}
             else:
                 while len(obj.data.materials) > 0:
                     obj.data.materials.pop(index=0)
 
         mhmat = MHMat(fileName=self.filepath)
-        mhmat.assignAsNodesMaterialForObj(obj)
+        mhmat.assignAsNodesMaterialForObj(scn, obj, True)
         
         ##- Load Blend -##
         path = mhmat.settings["blendMaterial"]

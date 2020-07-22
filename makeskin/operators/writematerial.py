@@ -7,6 +7,9 @@ from bpy.props import BoolProperty, StringProperty, EnumProperty, IntProperty, C
 from ..material import MHMat
 from ..utils import hasMaterial, blendMatSave
 
+#  create a predefined name of the material (not untitled) from the material name itself
+#
+#
 class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
     """Write material to MHMAT file"""
     bl_idname = "makeskin.write_material"
@@ -16,6 +19,12 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
     filename_ext = '.mhmat'
 
     filter_glob: StringProperty(default='*.mhmat', options={'HIDDEN'})
+    filepath: StringProperty(
+            name="File Path",
+            description="Filepath used for exporting the file",
+            maxlen=1024,
+            subtype='FILE_PATH',
+            )
 
     @classmethod
     def poll(self, context):
@@ -24,6 +33,18 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
                 return False
             return True
         return False
+
+    def invoke(self, context, event):
+        import os
+        if not self.filepath:
+            blend_filepath = context.active_object.MhMsName;
+            # just in case ... ;)
+            if not blend_filepath:
+                blend_filepath = "untitled"
+            self.filepath = blend_filepath + self.filename_ext
+
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
     def execute(self, context):
 
@@ -42,70 +63,15 @@ class MHS_OT_WriteMaterialOperator(bpy.types.Operator, ExportHelper):
             self.report({'ERROR'}, checkImg)
             return {'FINISHED'}
 
-        if obj.MhMsName:
-            mhmat.settings['name'] = obj.MhMsName
+        errtext = mhmat.writeMHmat(obj, fnAbsolute)
+        if errtext:
+            self.report({'ERROR'}, errtext)
+        else:
+            self.report({'INFO'}, "A material file was written")
 
-        if obj.MhMsTag:
-            mhmat.settings['tag'] = obj.MhMsTag
-
-        if obj.MhMsDescription:
-            mhmat.settings['description'] = obj.MhMsDescription
-
-        if obj.MhMsAuthor:
-            mhmat.settings['author'] = obj.MhMsAuthor
-
-        if obj.MhMsHomepage:
-            mhmat.settings['homepage'] = obj.MhMsHomepage
-
-        mhmat.settings['license'] = obj.MhMsMatLicense
-        mhmat.settings['backfaceCull'] = obj.MhMsBackfaceCull
-        mhmat.settings['castShadows'] = obj.MhMsCastShadows
-        mhmat.settings['receiveShadows'] = obj.MhMsReceiveShadows
-        mhmat.settings['alphaToCoverage'] = obj.MhMsAlphaToCoverage
-        mhmat.settings['shadeless'] = obj.MhMsShadeless
-        mhmat.settings['wireframe'] = obj.MhMsWireframe
-        mhmat.settings['transparent'] = obj.MhMsTransparent
-        mhmat.settings['depthless'] = obj.MhMsDepthless
-        mhmat.settings['sssEnable'] = obj.MhMsSSSEnable
-        mhmat.settings['autoBlendSkin'] = obj.MhMsAutoBlend
-        mhmat.settings['writeBlendMaterial'] = obj.MhMsWriteBlendMaterial
-
-        handling = "NORMALIZE"
-        if obj.MhMsTextures:
-            handling = obj.MhMsTextures
-        if handling == "NORMALIZE":
-            mhmat.copyTextures(fnAbsolute)
-        if handling == "COPY":
-            mhmat.copyTextures(fnAbsolute,normalize=False)
-        # If handling is LINK, then paths are already correct
-
-        if mhmat.settings["normalmapTexture"]:
-            mhmat.shaderConfig["normal"] = True
-        if mhmat.settings["bumpmapTexture"]:
-            mhmat.shaderConfig["bump"] = True
-        if obj.MhMsUseLit and obj.MhMsLitsphere:
-            mhmat.litSphere = obj.MhMsLitsphere
-        if mhmat.settings["displacementmapTexture"]:
-            mhmat.shaderConfig["displacement"] = True
-        
-        ##- Save blend -##
-        if mhmat.settings["writeBlendMaterial"]:
-            try:  matName = obj.material_slots[1].name
-            except IndexError:
-              msg = "Object does not have a second material."
-              self.report({'ERROR'}, msg)
-              raise IndexError(msg)
-            
-            from pathlib import Path
-            path = Path(fnAbsolute).with_suffix('.mat.blend')
-            mhmat.settings["blendMaterial"] = path.name+'/materials/'+matName
-            blendMatSave(path)
-
-
-        with open(fnAbsolute,'w') as f:
-            f.write(str(mhmat))
+        # debug
         print(mhmat)
-        self.report({'INFO'}, "A material file was written")
+
 
         return {'FINISHED'}
 

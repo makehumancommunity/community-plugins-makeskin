@@ -5,10 +5,10 @@ import bpy
 import bpy.types
 import re, os
 from .utils import createEmptyMaterial
+from .extraproperties import _licenses, _litspheres
 from .nodehelper import NodeHelper
 from .mhmat_keys import MHMAT_KEYS, MHMAT_SHADER_KEYS, MHMAT_KEY_GROUPS, MHMAT_NAME_TO_KEY
 from .keytypes import *
-from datetime import datetime
 import shutil
 
 class MHMat:
@@ -23,6 +23,7 @@ class MHMat:
 
         for keyObj in MHMAT_KEYS:
             self.settings[keyObj.keyName] = keyObj.defaultValue
+            print (keyObj.keyName)
 
         # Internal variables for parsing object material
         self._nodes = None
@@ -49,28 +50,35 @@ class MHMat:
         if not fileName is None:
             self._parseFile(fileName)
 
+    # test for all texture nodes and add an error text to be displayed on blender
+    #
     def checkAllTexturesAreSaved(self):
 
         nh = self.nodehelper
 
-        pre = "There is "
-        post = " texture node, but it doesn't point at a physical file. You will need to save the image to a file before trying to save the material."
-
         tn = nh.findDiffuseTextureNode()
-        if tn and not nh.findDiffuseTextureFilePath():
-            return pre + "a diffuse image " + post
+        if tn:
+            (name, err) = nh.findDiffuseTextureFilePath()
+            if (err):
+                return "Diffuse image: " + err
 
         tn = nh.findNormalMapTextureNode()
-        if tn and not nh.findNormalMapTextureFilePath():
-            return pre + "a normal map " + post
+        if tn:
+            (name, err) = nh.findNormalMapTextureFilePath()
+            if (err):
+                return "Normal map: " + err
 
         tn = nh.findBumpMapTextureNode()
-        if tn and not nh.findBumpMapTextureFilePath():
-            return pre + "a bump map " + post
+        if tn:
+            (name, err) = nh.findBumpMapTextureFilePath()
+            if (err):
+                return "Bump map: " + err
 
         tn = nh.findTransmissionTextureNode()
-        if tn and not nh.findTransmissionTextureFilePath():
-            return pre + "a transmission map " + post
+        if tn:
+            (name, err) = nh.findTransmissionTextureFilePath()
+            if (err):
+                return "Transmission map: " + err
 
         return ""
 
@@ -88,39 +96,40 @@ class MHMat:
         nh = self.nodehelper
 
         sett["diffuseTexture"] = None
-        dtp = nh.findDiffuseTextureFilePath()
+        (dtp, err) = nh.findDiffuseTextureFilePath()
         if dtp and str(dtp).strip():
             sett["diffuseTexture"] = str(dtp).strip()
 
         sett["transmissionmapTexture"] = None
-        dtp = nh.findTransmissionTextureFilePath()
+        (dtp, err) = nh.findTransmissionTextureFilePath()
         if dtp and str(dtp).strip():
             sett["transmissionmapTexture"] = str(dtp).strip()
 
         sett["roughnessmapTexture"] = None
-        dtp = nh.findRoughnessTextureFilePath()
+        (dtp, err) = nh.findRoughnessTextureFilePath()
         if dtp and str(dtp).strip():
             sett["roughnessmapTexture"] = str(dtp).strip()
 
         sett["metallicmapTexture"] = None
-        dtp = nh.findMetallicTextureFilePath()
+        (dtp, err) = nh.findMetallicTextureFilePath()
         if dtp and str(dtp).strip():
             sett["metallicmapTexture"] = str(dtp).strip()
 
         sett["bumpmapTexture"] = None
-        dtp = nh.findBumpMapTextureFilePath()
+        (dtp, err) = nh.findBumpMapTextureFilePath()
         if dtp and str(dtp).strip():
+            sett["metallicmapTexture"] = str(dtp).strip()
             sett["bumpmapTexture"] = str(dtp).strip()
             sett["bumpmapIntensity"] = nh.findBumpMapIntensity()
 
         sett["normalmapTexture"] = None
-        dtp = nh.findNormalMapTextureFilePath()
+        (dtp, err) = nh.findNormalMapTextureFilePath()
         if dtp and str(dtp).strip():
             sett["normalmapTexture"] = str(dtp).strip()
             sett["normalmapIntensity"] = nh.findNormalMapIntensity()
 
         sett["displacementmapTexture"] = None
-        dtp = nh.findDisplacementTextureFilePath()
+        (dtp, err) = nh.findDisplacementTextureFilePath()
         if dtp and str(dtp).strip():
             sett["displacementmapTexture"] = str(dtp).strip()
             sett["displacementmapIntensity"] = nh.findDisplacementMapIntensity()
@@ -158,7 +167,7 @@ class MHMat:
         (matBase, matExt) = os.path.splitext(matBaseName)
 
         for keyObj in MHMAT_KEYS:
-            if isinstance(keyObj, MHMATFileKey) and keyObj.keyName in self.settings:
+            if isinstance(keyObj, MHMATFileKey) and keyObj.keyName in self.settings and keyObj.keyName != "litsphereTexture":
                 key = keyObj.keyName
                 print(key)
                 origLoc = self.settings[key]
@@ -175,19 +184,100 @@ class MHMat:
                     origLoc = os.path.abspath(origLoc)
                     destLoc = os.path.abspath(destLoc)
                     if origLoc != destLoc:
+                        print ("copy from " + origLoc  + " to " + destLoc)
                         shutil.copyfile(origLoc, destLoc)
                     else:
                         print("Source and destination is same file, skipping texture copy for this entry")
                     if adjustSettings:
                         self.settings[key] = baseName
 
-    def assignAsNodesMaterialForObj(self, obj, diffusePH=False, bumpPH=False, normalPH=False, transpPH=False, displacePH=False, roughnessPH=False, metallicPH=False):
-        if obj is None:
+    #
+    # create a node-setup for a new or loaded material
+    # take information from scene and objects
+    #
+    def assignAsNodesMaterialForObj(self, scn, obj, mode_load=False):
+        if obj is None or scn is None:
             return
-        now = datetime.now()
-        name = "makeskin." + now.strftime("%Y%m%d%H:%M:%S")
+
+        diffusePH=False
+        bumpPH=False
+        normalPH=False
+        transpPH=False
+        displacePH=False
+        roughnessPH=False
+        metallicPH=False
+        name = None
+
+        if mode_load is False:
+            diffusePH = scn.MhMsCreateDiffuse
+            normalPH = scn.MhMsCreateNormal
+            bumpPH = scn.MhMsCreateBump
+            transpPH = scn.MhMsCreateTrans
+            roughnessPH = scn.MhMsCreateRough
+            metallicPH = scn.MhMsCreateMetallic
+            displacePH = scn.MhMsCreateDisp
+            name = obj.name
+            self.settings["litsphereTexture"] = obj.MhMsLitsphere
+            self.settings["shadeless"] = obj.MhMsShadeless
+            self.settings["transparent"] = obj.MhMsTransparent
+            self.settings["alphaToCoverage"] = obj.MhMsAlphaToCoverage
+            self.settings["backfaceCull"] = obj.MhMsBackfaceCull
+            self.settings["depthless"] = obj.MhMsDepthless
+            self.settings["castShadows"] = obj.MhMsCastShadows
+            self.settings["receiveShadows"] = obj.MhMsReceiveShadows
+            self.settings["wireframe"] = obj.MhMsWireframe
+        else:
+            name = self.settings["name"]
+            obj.MhMsShadeless = self.settings["shadeless"]
+            obj.MhMsTransparent = self.settings["transparent"]
+            obj.MhMsAlphaToCoverage = self.settings["alphaToCoverage"]
+            obj.MhMsBackfaceCull = self.settings["backfaceCull"]
+            obj.MhMsDepthless = self.settings["depthless"]
+            obj.MhMsCastShadows = self.settings["castShadows"]
+            obj.MhMsReceiveShadows = self.settings["receiveShadows"]
+            obj.MhMsWireframe = self.settings["wireframe"]
+            for elem in _litspheres:
+                if self.settings["litsphereTexture"] == elem[0]:
+                    obj.MhMsLitsphere = self.settings["litsphereTexture"]
+                    break
+
         mat = createEmptyMaterial(obj,name)
         self.nodehelper = NodeHelper(obj)
+
+        # --- set the values in the menu (needed after import)
+        #
+        obj.MhMsName = mat.name # using mat.name instead of mat will take the real name like asset.001
+
+        # license must fit to the values allowed
+        #
+        for elem in _licenses:
+            if self.settings["license"] == elem[0]:
+                obj.MhMsMatLicense = self.settings["license"]
+                break
+
+        if self.settings["description"]:
+            obj.MhMsDescription = self.settings["description"]
+        if self.settings["tag"]:
+            obj.MhMsTag = self.settings["tag"]
+        if self.settings["author"]:
+            obj.MhMsAuthor = self.settings["author"]
+        if self.settings["homepage"]:
+            obj.MhMsHomepage = self.settings["homepage"]
+
+
+        # --- visualization of MakeHuman internals in node-setup
+        #
+        # create node-frame for MakeHuman additional nodes
+        #
+        if scn.MhMsNodeVis:
+            frame = self.nodehelper.createMHNodeFrame ("MakeHuman Internal")
+
+            # now add all internal values to this frame
+            #
+            for nodename in [ "shadeless", "wireframe", "transparent", "alphaToCoverage", "backfaceCull", "depthless", "castShadows", "receiveShadows", "litsphereTexture" ]:
+                self.nodehelper.createDummyNode(nodename, self.settings[nodename], frame)
+
+
         if self.settings["diffuseTexture"] or diffusePH:
             self.nodehelper.createDiffuseTextureNode(self.settings["diffuseTexture"])
 
@@ -205,7 +295,11 @@ class MHMat:
 
         if self.settings["diffuseColor"] is not None:
             col = self.settings["diffuseColor"]
-            col.append(1.0)
+
+            # TODO weird hack to be changed later, but otherwise col grows to infinity when 2nd material is added 
+            if len(col) < 4:
+                col.append(1.0)
+
             self.nodehelper.setPrincipledSocketDefaultValue("Base Color", col)
             diffuseIntensity = self.nodehelper.findNodeByName("diffuseIntensity")
             if diffuseIntensity:
@@ -253,7 +347,77 @@ class MHMat:
                 self.nodehelper.createOnlyBump(bumpImagePathAbsolute=self.settings["bumpmapTexture"])
             if normal:
                 self.nodehelper.createOnlyNormal(normalImagePathAbsolute=self.settings["normalmapTexture"])
+
         return mat
+
+    def writeMHmat(self, obj, fnAbsolute):
+
+        errtext = None
+
+        if obj.MhMsName:
+            self.settings['name'] = obj.MhMsName
+
+        if obj.MhMsTag:
+            self.settings['tag'] = obj.MhMsTag
+
+        if obj.MhMsDescription:
+            self.settings['description'] = obj.MhMsDescription
+
+        if obj.MhMsAuthor:
+            self.settings['author'] = obj.MhMsAuthor
+
+        if obj.MhMsHomepage:
+            self.settings['homepage'] = obj.MhMsHomepage
+
+        self.settings['license'] = obj.MhMsMatLicense
+        self.settings['backfaceCull'] = obj.MhMsBackfaceCull
+        self.settings['castShadows'] = obj.MhMsCastShadows
+        self.settings['receiveShadows'] = obj.MhMsReceiveShadows
+        self.settings['alphaToCoverage'] = obj.MhMsAlphaToCoverage
+        self.settings['shadeless'] = obj.MhMsShadeless
+        self.settings['wireframe'] = obj.MhMsWireframe
+        self.settings['transparent'] = obj.MhMsTransparent
+        self.settings['depthless'] = obj.MhMsDepthless
+        self.settings['sssEnable'] = obj.MhMsSSSEnable
+        self.settings['autoBlendSkin'] = obj.MhMsAutoBlend
+        self.settings['writeBlendMaterial'] = obj.MhMsWriteBlendMaterial
+
+        handling = "NORMALIZE"
+        if obj.MhMsTextures:
+            handling = obj.MhMsTextures
+        if handling == "NORMALIZE":
+            self.copyTextures(fnAbsolute)
+        if handling == "COPY":
+            self.copyTextures(fnAbsolute,normalize=False)
+        # If handling is LINK, then paths are already correct
+
+        if self.settings["normalmapTexture"]:
+            self.shaderConfig["normal"] = True
+        if self.settings["bumpmapTexture"]:
+            self.shaderConfig["bump"] = True
+        if obj.MhMsUseLit and obj.MhMsLitsphere:
+            self.litSphere = obj.MhMsLitsphere
+        if self.settings["displacementmapTexture"]:
+            self.shaderConfig["displacement"] = True
+        
+        ##- Save blend -##
+        if self.settings["writeBlendMaterial"]:
+            try:  matName = obj.material_slots[1].name
+            except IndexError:
+              errtext = "Object does not have a second material."
+              raise IndexError(errtext)
+            
+            from pathlib import Path
+            path = Path(fnAbsolute).with_suffix('.mat.blend')
+            self.settings["blendMaterial"] = path.name+'/materials/'+matName
+            blendMatSave(path)
+
+
+        with open(fnAbsolute,'w') as f:
+            f.write(str(self))
+
+        return (errtext)
+
 
     def _parseFile(self, fileName):
 
@@ -282,17 +446,32 @@ class MHMat:
                                 (usedKey, value) = keyObj.parse(parsedLine)
                         else:
                             print("Not a valid key: " + key)
-                        self.settings[key] = value
+                        #
+                        # handle multiple occurences of tag (create a comma-separated entry)
+                        #
+                        if key == 'tag':
+                            if self.settings[key]:
+                                self.settings[key] += ", " + value
+                            else:
+                                self.settings[key] = value
+                        elif key == 'shaderParam':
+                            if value[0] == "litsphereTexture":
+                                match = re.search(r'^litspheres\/(.*)\.png$', value[1])
+                                if match:
+                                    self.settings["litsphereTexture"] = match.group(1)
+                                    print (self.settings["litsphereTexture"])
+                        else:
+                            self.settings[key] = value
                     else:
                         if parsedLine.startswith("shader"):
+                            # TODO: check for shaderConfig, shader 
                             pass
-                            # TODO: check for shaderConfig, shader and shaderParam
                         else:
                             print("no match")
                             print(parsedLine)
                 line = f.readline()
         print(self)
-            
+
     def __str__(self):
         mat = "# This is a material file for MakeHuman, produced by MakeSkin\n"
 
@@ -302,14 +481,18 @@ class MHMat:
                 keyObj = MHMAT_NAME_TO_KEY[keyNameLower]
                 keyName = keyObj.keyName
                 if keyObj.keyGroup == keyGroup and not self.settings[keyName] is None:
-                    mat = mat + keyName + " " + keyObj.asString(self.settings[keyName]) + "\n"
+                    if keyName == "tag":
+                        for elem in self.settings["tag"].split(","):
+                            mat = mat + "tag " + elem.strip() + "\n"
+                    else:
+                        mat = mat + keyName + " " + keyObj.asString(self.settings[keyName]) + "\n"
 
         mat = mat + "\n"
         mat = mat + "// Shader properties (only affects how things look in MakeHuman)\n\n"
 
         if self.litSphere:
             mat = mat + "shader shaders/glsl/litsphere\n"
-            mat = mat + "shaderParam litsphereTexture litspheres/lit_" + str(self.litSphere) + ".png\n"
+            mat = mat + "shaderParam litsphereTexture litspheres/" + str(self.litSphere) + ".png\n"
         for key in self.shaderConfig.keys():
             mat = mat + "shaderConfig " + key + " " + str(self.shaderConfig[key]) + "\n"
 

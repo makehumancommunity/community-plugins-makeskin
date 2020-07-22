@@ -23,6 +23,8 @@ class MHMATKey:
     def asString(self, value):
         return str(value)
 
+# parse lines like name, description
+#
 
 class MHMATStringKey(MHMATKey):
 
@@ -38,6 +40,13 @@ class MHMATStringKey(MHMATKey):
                 value = str(match.group(2)).strip()
         return self.keyName, value
 
+# parse filenames like diffuseTexture, normalmapTexture ...
+# 
+# a path could be:
+#   * absolute filepath 
+#   * relative filepath like "materials/clothname.png"
+#   * a filename
+#
 
 class MHMATFileKey(MHMATKey):
 
@@ -53,7 +62,8 @@ class MHMATFileKey(MHMATKey):
             if match:
                 value = str(match.group(2)).strip()
         if not self.blendMaterial:
-            value = location + "/" + os.path.basename(value)
+            if not value.startswith("/"):
+                value = location + "/" + value
         else:
             # TODO: handle case where location is absolute. We cannot use basename since the path
             # TODO: continues into the structure of the file
@@ -129,7 +139,9 @@ class MHMATStringShaderKey(MHMATKey):
         if self.lineMatchesKey(line):
             match = re.search(r'^([a-zA-Z]+)\s+([^\s]+)\s+([^\s]+)$', line)
             if match:
-                value = str(match.group(3)).strip()
+                subkey = str(match.group(2))
+                ivalue = str(match.group(3)).strip()
+                value = [subkey, ivalue]
         return self.keyName, value
 
 class MHMATBooleanShaderKey(MHMATKey):

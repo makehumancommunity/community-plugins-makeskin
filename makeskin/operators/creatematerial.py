@@ -25,24 +25,19 @@ class MHS_OT_CreateMaterialOperator(bpy.types.Operator):
         scn = context.scene
 
         if hasMaterial(obj):
-            print(scn.MhMsOverwrite1)
-            if not scn.MhMsOverwrite1:
-                self.report({'ERROR'}, "Object already has a material, and only one material at a time is supported")
+            if not scn.MhMsOverwrite:
+                self.report({'ERROR'}, "A material for this object already exists, change 'replace' option in common settings to overwrite material")
                 return {'FINISHED'}
             else:
                 while len(obj.data.materials) > 0:
                     obj.data.materials.pop(index=0)
 
-        dPH = scn.MhMsCreateDiffuse
-        nPH = scn.MhMsCreateNormal
-        bPH = scn.MhMsCreateBump
-        tPH = scn.MhMsCreateTrans
-        rPH = scn.MhMsCreateRough
-        mPH = scn.MhMsCreateMetallic
-        disPH = scn.MhMsCreateDisp
-
         mhmat = MHMat()
-        mhmat.assignAsNodesMaterialForObj(obj, diffusePH=dPH, normalPH=nPH, bumpPH=bPH, transpPH=tPH, displacePH=disPH, roughnessPH=rPH, metallicPH=mPH)
+
+        # use object name as a first guess, if it already exists, a .001 is automatically appended by new function for material
+        #
+        name = obj.name
+        mhmat.assignAsNodesMaterialForObj(scn, obj)
 
         self.report({'INFO'}, "A template material was created")
         return {'FINISHED'}

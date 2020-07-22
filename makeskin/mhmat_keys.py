@@ -16,6 +16,7 @@ MHMAT_KEYS.append(MHMATStringKey("uuid", None, 'Metadata'))
 MHMAT_KEYS.append(MHMATStringKey("license", 'CC0', 'Metadata'))
 MHMAT_KEYS.append(MHMATStringKey("homepage", None, 'Metadata'))
 MHMAT_KEYS.append(MHMATStringKey("author", None, 'Metadata'))
+MHMAT_KEYS.append(MHMATStringShaderKey("shaderParam", None, 'Metadata'))
             
 ### COLORS ###
         
@@ -57,6 +58,7 @@ MHMAT_KEYS.append(MHMATFloatKey("sssBScale", None, 'SSS'))
 
 ### VARIOUS ###
         
+MHMAT_KEYS.append(MHMATFileKey("litsphereTexture", "lit_leather", 'Various'))
 MHMAT_KEYS.append(MHMATFileKey("blendMaterial", None, 'Various', blendMaterial=True))
 MHMAT_KEYS.append(MHMATFloatKey("metallic", None, 'Various'))
 MHMAT_KEYS.append(MHMATFloatKey("ior", None, 'Various'))
@@ -64,14 +66,14 @@ MHMAT_KEYS.append(MHMATFloatKey("roughness", 0.7, 'Various'))
 MHMAT_KEYS.append(MHMATFloatKey("shininess", 0.3, 'Various'))
 MHMAT_KEYS.append(MHMATFloatKey("opacity", 1.0, 'Various'))
 MHMAT_KEYS.append(MHMATFloatKey("translucency", None, 'Various'))
-MHMAT_KEYS.append(MHMATBooleanKey("shadeless", None, 'Various'))
-MHMAT_KEYS.append(MHMATBooleanKey("wireframe", None, 'Various'))
+MHMAT_KEYS.append(MHMATBooleanKey("shadeless", False, 'Various'))
+MHMAT_KEYS.append(MHMATBooleanKey("wireframe", False, 'Various'))
 MHMAT_KEYS.append(MHMATBooleanKey("transparent", False, 'Various'))
 MHMAT_KEYS.append(MHMATBooleanKey("alphaToCoverage", True, 'Various'))
-MHMAT_KEYS.append(MHMATBooleanKey("backfaceCull", None, 'Various'))
+MHMAT_KEYS.append(MHMATBooleanKey("backfaceCull", True, 'Various'))
 MHMAT_KEYS.append(MHMATBooleanKey("depthless", False, 'Various'))
-MHMAT_KEYS.append(MHMATBooleanKey("castShadows", None, 'Various'))
-MHMAT_KEYS.append(MHMATBooleanKey("receiveShadows", None, 'Various'))
+MHMAT_KEYS.append(MHMATBooleanKey("castShadows", True, 'Various'))
+MHMAT_KEYS.append(MHMATBooleanKey("receiveShadows", True, 'Various'))
 MHMAT_KEYS.append(MHMATBooleanKey("autoBlendSkin", None, 'Various'))
 
 MHMAT_NAME_TO_KEY = {}

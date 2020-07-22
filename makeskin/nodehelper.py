@@ -23,6 +23,19 @@ _coords["displacementTexture"] = [-300.0, -550.0]
 _coords["roughnessTexture"] = [-1000.0, -100.0]
 _coords["metallicTexture"] = [-1000.0, 450.0]
 
+# dummy nodes
+
+_coords["shadeless"] = [500.0, 450.0]
+_coords["wireframe"] = [500.0, 350.0]
+_coords["transparent"] = [500.0, 250.0]
+_coords["alphaToCoverage"] = [500.0, 150.0]
+_coords["backfaceCull"] = [500.0, 50.0]
+_coords["depthless"] =  [500.0, -50.0]
+_coords["castShadows"] = [500.0, -150.0]
+_coords["receiveShadows"] = [500.0, -250.0]
+_coords["litsphereTexture"] = [500.0, -350.0]
+
+
 class NodeHelper:
 
     def __init__(self, obj):
@@ -105,7 +118,34 @@ class NodeHelper:
             image.colorspace_settings.name = colorspace
             newTextureNode.image = image
         return newTextureNode
-    
+
+    # create MakeHuman Nodeframe
+    def createMHNodeFrame(self, name):
+        frame_node = self._nodetree.nodes.new("NodeFrame")
+        frame_node.label = name
+        frame_node.name = name
+        return frame_node
+
+    # create unlinked value nodes
+    #
+    def createDummyNode(self, name, value, parent):
+        # print ("Dummynode " + name + " " + str(value))
+        node = None
+        if type(value) is bool:
+            node = self._nodetree.nodes.new("ShaderNodeValue")
+            node.outputs["Value"].default_value = float(value)
+
+        if type(value) is str:
+            node = self._nodetree.nodes.new("ShaderNodeAttribute")
+            node.attribute_name = value
+
+        if node:
+            node.location = _coords[name]
+            node.parent = parent
+            node.name = name
+            node.label = name
+
+        return node
 
     def createBumpAndNormal(self, bumpImagePathAbsolute=None, normalImagePathAbsolute=None, linkToPrincipled=True):
         global _coords
@@ -163,26 +203,29 @@ class NodeHelper:
         nm.location = _coords["normalMapSolo"]
         return nmt
 
+    # test if a textureNode is well-defined, in case of error, return reason
+    #
     def _extractImageFilePath(self, textureNode):
         if not textureNode:
-            print("WARNING: trying to find texture for None node")
-            return None
+            return (None, "WARNING: to test a None node for filename")
         if textureNode.image:
             if textureNode.image.filepath or textureNode.image.filepath_raw:
                 if textureNode.image.filepath:
-                    return bpy.path.abspath(textureNode.image.filepath)
+                    path = bpy.path.abspath(textureNode.image.filepath)
+                    if os.path.isfile(path):
+                        return (path, None)
+                    return (None, path + " is not a file")
                 else:
-                    return bpy.path.abspath(textureNode.image.filepath_raw)
+                    return (bpy.path.abspath(textureNode.image.filepath_raw), None) #  file test?!
             else:
-                print("Found image texture with an image property, but the image had an empty file path.")
+                return (None, "Found image texture with an image property, but the image had an empty file path.")
         else:
-            print("Found an image texture, but its image property was empty.")
-        return None
+            return (None, "Found an image texture, but its image property is empty.")
 
-    def _findTexureFileName(self, nodeName):
+    def _findTextureFileName(self, nodeName):
         node = self.findNodeByName(nodeName)
         if not node:
-            return None
+            return (None, None)
         return self._extractImageFilePath(node)
 
     ##### DIFFUSE #####
@@ -211,7 +254,7 @@ class NodeHelper:
         return self.findNodeByName("diffuseTexture")
 
     def findDiffuseTextureFilePath(self):
-        return self._findTexureFileName("diffuseTexture")
+        return self._findTextureFileName("diffuseTexture")
 
     ##### TRANSMISSION #####
 
@@ -227,7 +270,7 @@ class NodeHelper:
         return self.findNodeByName("transmissionmapTexture")
 
     def findTransmissionTextureFilePath(self):
-        return self._findTexureFileName("transmissionmapTexture")
+        return self._findTextureFileName("transmissionmapTexture")
 
     ##### ROUGHNESS #####
 
@@ -243,7 +286,7 @@ class NodeHelper:
         return self.findNodeByName("roughnessmapTexture")
 
     def findRoughnessTextureFilePath(self):
-        return self._findTexureFileName("roughnessmapTexture")
+        return self._findTextureFileName("roughnessmapTexture")
 
     ##### METALLIC #####
 
@@ -259,7 +302,7 @@ class NodeHelper:
         return self.findNodeByName("metallicmapTexture")
 
     def findMetallicTextureFilePath(self):
-        return self._findTexureFileName("metallicmapTexture")
+        return self._findTextureFileName("metallicmapTexture")
 
     ##### BUMP #####
 
@@ -273,7 +316,7 @@ class NodeHelper:
         return self.findNodeSocketDefaultValue("bumpmap", "Strength")
 
     def findBumpMapTextureFilePath(self):
-        return self._findTexureFileName("bumpmapTexture")
+        return self._findTextureFileName("bumpmapTexture")
 
     ##### NORMAL #####
 
@@ -287,7 +330,7 @@ class NodeHelper:
         return self.findNodeSocketDefaultValue("normalmap", "Strength")
 
     def findNormalMapTextureFilePath(self):
-        return self._findTexureFileName("normalmapTexture")
+        return self._findTextureFileName("normalmapTexture")
 
     ##### DISPLACEMENT #####
 
@@ -312,7 +355,7 @@ class NodeHelper:
         return self.findNodeByName("displacementmapTexture")
 
     def findDisplacementTextureFilePath(self):
-        return self._findTexureFileName("displacementmapTexture")
+        return self._findTextureFileName("displacementmapTexture")
 
     def findDisplacementMapIntensity(self):
         return self.findNodeSocketDefaultValue("displacementmap", "Scale")
