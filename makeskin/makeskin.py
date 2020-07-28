@@ -11,9 +11,10 @@
 # [write material]
 
 import bpy
+from .utils import getVersion
 
 class MHS_PT_MakeSkinPanel(bpy.types.Panel):
-    bl_label = "MakeSkin"
+    bl_label = "MakeSkin v %d.%d.%d" % getVersion()
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "MakeSkin"

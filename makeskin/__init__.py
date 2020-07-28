@@ -4,12 +4,7 @@
 #  Authors: Joel Palmius
 #           black-punkduck
 
-from bpy.utils import register_class, unregister_class
-from .extraproperties import extraProperties
-from .makeskin import MHS_PT_MakeSkinPanel
-from .operators import *
-from .material import MHMat
-from .utils import blendMatLoad
+from .utils import blendMatLoad, setVersion
 
 bl_info = {
     "name": "MakeSkin",
@@ -20,6 +15,14 @@ bl_info = {
     "description": "Create MakeHuman Materials",
     'wiki_url': "http://www.makehumancommunity.org/",
     "category": "MakeHuman"}
+
+setVersion(bl_info["version"])
+
+from bpy.utils import register_class, unregister_class
+from .extraproperties import extraProperties
+from .makeskin import MHS_PT_MakeSkinPanel
+from .operators import *
+from .material import MHMat
 
 MAKESKIN_VERSION = bl_info["version"]
 

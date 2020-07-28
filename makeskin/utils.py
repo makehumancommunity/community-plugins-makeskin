@@ -3,6 +3,15 @@
 
 import bpy
 
+_VERSION = (0,0,0)
+
+def getVersion():
+    global _VERSION
+    return _VERSION
+
+def setVersion(version):
+    global _VERSION
+    _VERSION = version
 
 def hasMaterial(obj):
     if not obj.material_slots:
