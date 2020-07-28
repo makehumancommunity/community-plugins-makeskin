@@ -14,14 +14,14 @@ from .utils import blendMatLoad
 bl_info = {
     "name": "MakeSkin",
     "author": "Joel Palmius",
-    "version": (1,0,0),
+    "version": (0,9,0),
     "blender": (2,80,0),
     "location": "View3D > Properties > Make Skin",
     "description": "Create MakeHuman Materials",
     'wiki_url': "http://www.makehumancommunity.org/",
     "category": "MakeHuman"}
 
-MAKESKIN_VERSION = 20200718
+MAKESKIN_VERSION = bl_info["version"]
 
 MAKESKIN_CLASSES = []
 MAKESKIN_CLASSES.extend(OPERATOR_CLASSES)
