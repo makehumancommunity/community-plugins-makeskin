@@ -3,7 +3,7 @@
 
 import bpy
 import bpy.types
-import re, os
+import re, os, random
 from .utils import createEmptyMaterial
 from .extraproperties import _licenses, _litspheres
 from .nodehelper import NodeHelper
@@ -240,6 +240,10 @@ class MHMat:
                 if self.settings["litsphereTexture"] == elem[0]:
                     obj.MhMsLitsphere = self.settings["litsphereTexture"]
                     break
+
+        if not name:
+            # for the case that MHMAT file did not specify a name
+            name = "makeSkinMaterial." + str(random.randint(10000,99999))
 
         mat = createEmptyMaterial(obj,name)
         self.nodehelper = NodeHelper(obj)
