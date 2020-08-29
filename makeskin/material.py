@@ -406,15 +406,15 @@ class MHMat:
         
         ##- Save blend -##
         if self.settings["writeBlendMaterial"]:
-            try:  matName = obj.material_slots[1].name
-            except IndexError:
-              errtext = "Object does not have a second material."
-              raise IndexError(errtext)
+            if len(obj.material_slots) > 1:
+                matName = obj.material_slots[1].name
             
-            from pathlib import Path
-            path = Path(fnAbsolute).with_suffix('.mat.blend')
-            self.settings["blendMaterial"] = path.name+'/materials/'+matName
-            blendMatSave(path)
+                from pathlib import Path
+                path = Path(fnAbsolute).with_suffix('.mat.blend')
+                self.settings["blendMaterial"] = path.name+'/materials/'+matName
+                blendMatSave(path)
+            else:
+                errtext = "Save blender material was skipped, because object does not have a second material."
 
 
         with open(fnAbsolute,'w') as f:
