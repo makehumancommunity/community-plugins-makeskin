@@ -451,7 +451,7 @@ class MHMat:
                             else:
                                 (usedKey, value) = keyObj.parse(parsedLine)
                         else:
-                            print("Not a valid key: " + key)
+                            if key not in ["shader", "shaderConfig"]: print("Not a valid key: " + key)
                         #
                         # handle multiple occurences of tag (create a comma-separated entry)
                         #
