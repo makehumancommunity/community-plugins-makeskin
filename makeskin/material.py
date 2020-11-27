@@ -11,6 +11,8 @@ from .mhmat_keys import MHMAT_KEYS, MHMAT_SHADER_KEYS, MHMAT_KEY_GROUPS, MHMAT_N
 from .keytypes import *
 import shutil
 
+DEBUG = False
+
 class MHMat:
 
     def __init__(self, obj = None, fileName = None):
@@ -23,7 +25,7 @@ class MHMat:
 
         for keyObj in MHMAT_KEYS:
             self.settings[keyObj.keyName] = keyObj.defaultValue
-            print (keyObj.keyName)
+            if DEBUG: print (keyObj.keyName)
 
         # Internal variables for parsing object material
         self._nodes = None
@@ -169,9 +171,9 @@ class MHMat:
         for keyObj in MHMAT_KEYS:
             if isinstance(keyObj, MHMATFileKey) and keyObj.keyName in self.settings and keyObj.keyName != "litsphereTexture":
                 key = keyObj.keyName
-                print(key)
+                if DEBUG: print(key)
                 origLoc = self.settings[key]
-                print(origLoc)
+                if DEBUG: print(origLoc)
                 if origLoc:
                     (dummy, texExt) = os.path.splitext(origLoc)
                     if not normalize:
@@ -463,7 +465,7 @@ class MHMat:
                                 match = re.search(r'^litspheres\/(.*)\.png$', value[1])
                                 if match:
                                     self.settings["litsphereTexture"] = match.group(1)
-                                    print (self.settings["litsphereTexture"])
+                                    if DEBUG: print (self.settings["litsphereTexture"])
                         else:
                             self.settings[key] = value
                     else:
@@ -474,7 +476,7 @@ class MHMat:
                             print("no match")
                             print(parsedLine)
                 line = f.readline()
-        print(self)
+        if DEBUG: print(self)
 
     def __str__(self):
         mat = "# This is a material file for MakeHuman, produced by MakeSkin\n"
