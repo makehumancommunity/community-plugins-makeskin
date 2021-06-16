@@ -429,7 +429,7 @@ class MHMat:
 
         full = os.path.abspath(fileName)
         location = os.path.dirname(full)
-        with open(fileName, 'r') as f:
+        with open(fileName, 'r', errors='ignore') as f:
             line = f.readline()
             while line:
                 parsedLine = line.strip()
