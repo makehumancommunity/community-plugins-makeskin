@@ -4,7 +4,7 @@
 import bpy
 import bpy.types
 import re, os, random
-from .utils import createEmptyMaterial
+from .utils import createEmptyMaterial, blendMatSave
 from .extraproperties import _licenses, _litspheres
 from .nodehelper import NodeHelper
 from .mhmat_keys import MHMAT_KEYS, MHMAT_SHADER_KEYS, MHMAT_KEY_GROUPS, MHMAT_NAME_TO_KEY
