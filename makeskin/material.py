@@ -146,7 +146,7 @@ class MHMat:
         sett["diffuseColor"] = [diffuseColor[0], diffuseColor[1], diffuseColor[2]]
 
         sett["emissiveColor"] = None
-        col = nh.getPrincipledSocketDefaultValue("Emission")
+        col = nh.getPrincipledSocketDefaultValue(27)
         if col:
             if col[0] < 0.01 and col[1] < 0.01 and col[2] < 0.01:
                 pass # emission is black
